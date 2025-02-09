@@ -150,8 +150,8 @@ function events.render()
     -- Animation Change Controls
     local playing = animations:getPlaying()
 
-    playing = remove_val_from(playing, animations.model.dress_sprint)
-    playing = remove_val_from(playing, animations.model.dress_walk)
+    playing = remove_val_from(playing, animations.model.dress_move)
+    playing = remove_val_from(playing, animations.model.dress_sit)
     playing = remove_val_from(playing, animations.model.dress_crouch)
     local playing_no_blink = remove_val_from(playing, animations.model.blink)
 
@@ -218,12 +218,23 @@ end
 function events.tick()
     if DRESS then
         local crouching = player:getPose() == "CROUCHING"
-        local walking = player:getVelocity().xz:length() > .01
-        local sprinting = player:isSprinting()
+        local moving = player:getVelocity().xz:length() > .01
+        local sitting = false
+        if player:getVehicle() then
+            sitting = true
+        end
 
-        animations.model.dress_walk:setPlaying(walking and not sprinting)
-        animations.model.dress_sprint:setPlaying(sprinting and not crouching)
+        animations.model.dress_sit:setPlaying(sitting)
         animations.model.dress_crouch:setPlaying(crouching)
+
+        local face_angle = math.rad(((player:getBodyYaw() - 90) % 360) - 180)
+        local face = vec(math.cos(face_angle), math.sin(face_angle))
+        local move = player:getVelocity():normalize().xz
+        local direction = move:dot(face)
+
+        animations.model.dress_move:setPlaying(moving and not sitting)
+        animations.model.dress_move:setSpeed(player:getVelocity().xz:length() * 5)
+        models.model.root.Dress:setRot(player:getVelocity().xz:length() * -30 * direction, 0, 0)
     end
 end
 

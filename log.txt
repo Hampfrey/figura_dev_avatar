@@ -1,0 +1,17 @@
+ENTRIES
+
+25/02/07
+ g: begin the foundations of the project
+
+ r: some basic elements started, by manually directing which component to edit, its position and rotation can be crudely changed
+    need to add "local axis rotation," currently the rotation controls become very confusing as they stack up in multiple directions
+
+25/02/09
+ g: update the dress to to work in more situations and to have more accurate movement
+
+ r: dress now leans back and forth based on the difference between the body facing vector and the movement vector
+    dress walk cycle is now scaled based on speed
+    dress can now sit
+    dress code was moved from personal desktop to laptop and GitHub
+
+ l: need to get GitHub working on personal desktop
