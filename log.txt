@@ -15,3 +15,15 @@ ENTRIES
     dress code was moved from personal desktop to laptop and GitHub
 
  l: need to get GitHub working on personal desktop
+
+25/02/21
+ g: no clue, haven't updated log in 12 days, still working on local rotation
+
+ r: moving towards finishing the rest of the program, then figuring out the local math
+
+15/02/25
+ g: reorganize the new action wheels and infrastructure for the pose editor
+
+ r: action wheel has custom icons
+    second page for other
+    seems mostly working
