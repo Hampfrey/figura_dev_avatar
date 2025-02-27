@@ -21,9 +21,15 @@ ENTRIES
 
  r: moving towards finishing the rest of the program, then figuring out the local math
 
-15/02/25
+25/02/25
  g: reorganize the new action wheels and infrastructure for the pose editor
 
  r: action wheel has custom icons
     second page for other
     seems mostly working
+
+25/02/26
+ g: update to figura v0.1.5
+
+25/02/27
+ g: make project sync with figura backend

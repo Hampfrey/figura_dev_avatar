@@ -3,7 +3,7 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72)
 
-DRESS = true
+DRESS = false
 
 -- Hide vanilla player
 vanilla_model.PLAYER:setVisible(false)
@@ -14,6 +14,10 @@ vanilla_model.CAPE:setVisible(false)
 
 -- Set Visibility
 models.model.root:setVisible(true)
+
+models.model.root.Body:setVisible(true)
+models.model.root.LeftArm:setVisible(true)
+models.model.root.RightArm:setVisible(true)
 
 models.model.root.Head.AnimationHat:setVisible(false)
 models.model.root.Head.AnimationHead:setVisible(false)
@@ -150,7 +154,8 @@ display_text:setText("")
 -- Camera
 function events.render()
     -- Animation Change Controls
-    local playing = animations:getPlaying()
+    local playing = animations:getPlaying(true)
+    --logTable((playing))
 
     playing = remove_val_from(playing, animations.model.dress_move)
     playing = remove_val_from(playing, animations.model.dress_sit)
@@ -373,10 +378,15 @@ local help_key = keybinds:newKeybind("Print Help", "key.keyboard.f6")
 help_key.press = help
 
 -- Auto End
+
+function anim_is_active(anim)
+    return anim:isPlaying() or anim:isHolding()
+end
+
 function animation_end()
     if action_wheel:isEnabled() and main_page == action_wheel:getCurrentPage() then
         -- Other
-        if animations.model.curl:isPlaying() then pings.curl() end
+        if anim_is_active(animations.model.curl) then pings.curl() end
         if animations.model.handstand:isPlaying() then pings.handstand() end
 
         -- Sits
@@ -439,11 +449,14 @@ local pe_key_activate = keybinds:newKeybind("PE Start", "key.keyboard.f7")
 --[[
 local pe_key_forward = keybinds:newKeybind("PE Forward", "key.keyboard.home")
 local pe_key_backward = keybinds:newKeybind("PE Backward", "key.keyboard.end")
-local pe_key_left = keybinds:newKeybind("PE Left", "key.keyboard.page.down")
-local pe_key_right = keybinds:newKeybind("PE Right", "key.keyboard.delete")
+local pe_key_left = keybinds:newKeybind("PE Left", "key.keyboard.delete")
+local pe_key_right = keybinds:newKeybind("PE Right", "key.keyboard.page.down")
 local pe_key_up = keybinds:newKeybind("PE Up", "key.keyboard.insert")
 local pe_key_down = keybinds:newKeybind("PE Down", "key.keyboard.page.up")
-local pe_key_mode = keybinds:newKeybind("PE Mode", "key.keyboard.num.lock")
+local pe_key_mode = keybinds:newKeybind("PE Mode", "key.keyboard.up")
+local pe_key_space = keybinds:newKeybind("PE Space", "key.keyboard.right")
+local pe_key_scale = keybinds:newKeybind("PE Scale", "key.keyboard.left")
+local pe_key_gumball = keybinds:newKeybind("PE Gumball", "key.keyboard.down")
 --]]
 
 local pe_key_forward = keybinds:newKeybind("PE Forward", "key.keyboard.up")
@@ -452,22 +465,31 @@ local pe_key_left = keybinds:newKeybind("PE Left", "key.keyboard.left")
 local pe_key_right = keybinds:newKeybind("PE Right", "key.keyboard.right")
 local pe_key_up = keybinds:newKeybind("PE Up", "key.keyboard.slash")
 local pe_key_down = keybinds:newKeybind("PE Down", "key.keyboard.right.shift")
-local pe_key_mode = keybinds:newKeybind("PE Mode", "key.keyboard.right.alt")
-local pe_key_space = keybinds:newKeybind("PE Space", "key.keyboard.right.control")
-local pe_key_scale = keybinds:newKeybind("PE Space", "key.keyboard.period")
+local pe_key_mode = keybinds:newKeybind("PE Mode", "key.keyboard.right.control")
+local pe_key_space = keybinds:newKeybind("PE Space", "key.keyboard.comma")
+local pe_key_scale = keybinds:newKeybind("PE Scale", "key.keyboard.right.alt")
+local pe_key_gumball = keybinds:newKeybind("PE Gumball", "key.keyboard.period")
 
+
+-- PE VARIABLES
 pe_selected = models.model.root.RightArm
 
 pe_active = false
+pe_gumball = true
 
 pe_pos_mode = true
 pe_local_mode = false
+
 pe_rot_scale = 15
 pe_pos_scale = 1
 
 pe_pos = vec(0, 0, 0)
 pe_rot = vec(0, 0, 0)
 
+-- PE OTHER
+models.model.Gumball:setPrimaryRenderType("CUTOUT_EMISSIVE_SOLID")
+
+-- Pe Edit
 function pe_edit(vector)
     if pe_active then
         if pe_pos_mode then
@@ -476,6 +498,7 @@ function pe_edit(vector)
             else
                 pe_pos = pe_pos + vector * pe_pos_scale
             end
+            log(pe_pos)
             pe_selected:setPos(pe_pos)
         else
             if pe_local_mode then
@@ -489,21 +512,44 @@ function pe_edit(vector)
     end
 end
 
+-- Pe Selection
+function pe_selction(part)
+    pe_selected = part
+    pe_pos = part:getPos()
+    pe_rot = part:getRot()
+end
+
+-- Gumball
+function events.tick()
+    if pe_active then
+        local pos = pe_selected:getPivot() + pe_selected:getTruePos() + pe_selected:getParent():getTruePos() + pe_selected:getParent():getParent():getTruePos() -- this is wildly messy but it works
+        models.model.Gumball:setVisible(pe_gumball)
+        models.model.Gumball:setPos(pos)
+        models.model.Gumball.Pos:setVisible(pe_pos_mode)
+        models.model.Gumball.Rot:setVisible(not pe_pos_mode)
+        models.model.Gumball.Rot:setRot(pe_selected:getAnimRot())
+    else
+        models.model.Gumball:setVisible(false)
+    end
+end
+
 -- Activate
 function pe_func_activate()
     pe_active = not pe_active
     if pe_active then
         log("POSE EDITOR ENABLED")
         action_wheel:setPage(pe_page)
+        animations.model.freeze:play()
     else
         log("POSE EDITOR DISABLED")
         action_wheel:setPage(main_page)
+        animations.model.freeze:stop()
     end
 end
 pe_key_activate.press = pe_func_activate
 
--- Mode
-function pe_func_mode()
+-- Space
+function pe_func_space()
     if pe_active then
         pe_local_mode = not pe_local_mode
         if pe_local_mode then
@@ -513,7 +559,7 @@ function pe_func_mode()
         end
     end
 end
-pe_key_mode.press = pe_func_mode
+pe_key_space.press = pe_func_space
 
 -- Scale
 function pe_func_scale()
@@ -521,7 +567,7 @@ function pe_func_scale()
         if pe_rot_scale == 15 then
             log("Small")
             pe_rot_scale = 1
-            pe_pos_scale = 0.05
+            pe_pos_scale = 0.1
         else
             log("Large")
             pe_rot_scale = 15
@@ -531,9 +577,8 @@ function pe_func_scale()
 end
 pe_key_scale.press = pe_func_scale
 
-
 -- Space
-function pe_func_space()
+function pe_func_mode()
     if pe_active then
         pe_pos_mode = not pe_pos_mode
         if pe_pos_mode then
@@ -543,7 +588,22 @@ function pe_func_space()
         end
     end
 end
-pe_key_space.press = pe_func_space
+pe_key_mode.press = pe_func_mode
+
+-- Gumball
+function pe_func_gumball()
+    if pe_active then
+        pe_gumball = not pe_gumball
+        if pe_gumball then
+            log("Gumball On")
+        else
+            log("Gumball Off")
+        end
+    end
+end
+pe_key_gumball.press = pe_func_gumball
+
+-- DIRECTIONS
 
 -- Forward
 function pe_func_forward()
@@ -590,7 +650,7 @@ function pe_func_up()
     if pe_pos_mode then
         pe_edit(vec(0, 1, 0))
     else
-        pe_edit(vec(0, 1, 0))
+        pe_edit(vec(0, -1, 0))
     end
 end
 pe_key_up.press = pe_func_up
@@ -600,90 +660,77 @@ function pe_func_down()
     if pe_pos_mode then
         pe_edit(vec(0, -1, 0))
     else
-        pe_edit(vec(0, -1, 0))
+        pe_edit(vec(0, 1, 0))
     end
 end
 pe_key_down.press = pe_func_down
 
-logTable(textures:getTextures())
-
 -- Pose Editor Actions
-local action = pe_page:newAction(1)
+
+action = pe_page:newAction(1)
     :title("Head")
-    :texture(textures["model.icons"],0 ,0 ,16, 16)
+    :texture(textures["other_textures.icons"], 0 , 0, 16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root.Head
+        pe_selction(models.model.root.Head)
         log("Head")
-        pe_pos = models.model.root.Head:getPos()
-        pe_rot = models.model.root.Head:getRot()
     end)
 
-local action = pe_page:newAction(8)
+action = pe_page:newAction(8)
     :title("Body")
-    :texture(textures["model.icons"],16 ,0 ,16, 16)
+    :texture(textures["other_textures.icons"], 16 ,0 , 16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root.Body
+        pe_selction(models.model.root.Body)
         log("Body")
-        pe_pos = models.model.root.Body:getPos()
-        pe_rot = models.model.root.Body:getRot()
     end)
 
-local action = pe_page:newAction(2)
+action = pe_page:newAction(2)
     :title("Left Arm")
-    :texture(textures["model.icons"],32 ,0 ,16, 16)
+    :texture(textures["other_textures.icons"],32 ,0 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root.LeftArm
+        pe_selction(models.model.root.LeftArm)
         log("Left Arm")
-        pe_pos = models.model.root.LeftArm:getPos()
-        pe_rot = models.model.root.LeftArm:getRot()
     end)
 
-local action = pe_page:newAction(7)
+action = pe_page:newAction(7)
     :title("Right Arm")
-    :texture(textures["model.icons"],48 ,0 ,16, 16)
+    :texture(textures["other_textures.icons"],48 ,0 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root.RightArm
+        pe_selction(models.model.root.RightArm)
         log("Right Arm")
-        pe_pos = models.model.root.RightArm:getPos()
-        pe_rot = models.model.root.RightArm:getRot()
     end)
 
-local action = pe_page:newAction(3)
+action = pe_page:newAction(3)
     :title("Left Leg")
-    :texture(textures["model.icons"],0 ,16 ,16, 16)
+    :texture(textures["other_textures.icons"],0 ,16 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root.LeftLeg
+        pe_selction(models.model.root.LeftLeg)
         log("Left Leg")
-        pe_pos = models.model.root.LeftLeg:getPos()
-        pe_rot = models.model.root.LeftLeg:getRot()
     end)
 
-local action = pe_page:newAction(6)
+action = pe_page:newAction(6)
     :title("RightLeg")
-    :texture(textures["model.icons"],16 ,16 ,16, 16)
+    :texture(textures["other_textures.icons"],16 ,16 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root.RightLeg
+        pe_selction(models.model.root.RightLeg)
         log("Right Leg")
-        pe_pos = models.model.root.RightLeg:getPos()
-        pe_rot = models.model.root.RightLeg:getRot()
     end)
 
-local action = pe_page:newAction(4)
+action = pe_page:newAction(4)
     :title("Other")
-    :texture(textures["model.icons"],32 ,16 ,16, 16)
+    :texture(textures["other_textures.icons"],32 ,16 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
         action_wheel:setPage(pe_page_2)
         display_text:setText("Pose Editor Other")
     end)
 
-local action = pe_page:newAction(5)
+action = pe_page:newAction(5)
     :title("End")
     :item("minecraft:barrier")
     :hoverColor(HOVER)
@@ -696,82 +743,76 @@ local action = pe_page:newAction(5)
 
 -- Pose Editor Other
 
-local action = pe_page_2:newAction()
+action = pe_page_2:newAction()
     :title("Dress")
-    :texture(textures["model.icons"],48 ,16 ,16, 16)
+    :texture(textures["other_textures.icons"],48 ,16 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root.Dress
+        pe_selction(models.model.root.Dress)
         log("Dress")
-        pe_pos = models.model.root.Dress:getPos()
-        pe_rot = models.model.root.Dress:getRot()
     end)
 
-local action = pe_page_2:newAction()
+action = pe_page_2:newAction()
     :title("Breast")
-    :texture(textures["model.icons"],0 ,32 ,16, 16)
+    :texture(textures["other_textures.icons"],0 ,32 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root.Body.Breast
+        pe_selction(models.model.root.Body.Breast)
         log("Breast")
-        pe_pos = models.model.root.Body.Breast:getPos()
-        pe_rot = models.model.root.Body.Breast:getRot()
     end)
 
-local action = pe_page_2:newAction()
+action = pe_page_2:newAction()
     :title("Root")
-    :texture(textures["model.icons"],16 ,32 ,16, 16)
+    :texture(textures["other_textures.icons"],16 ,32 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.root
+        pe_selction(models.model.root)
         log("Root")
-        pe_pos = models.model.root:getPos()
-        pe_rot = models.model.root:getRot()
     end)
 
-local action = pe_page_2:newAction()
+action = pe_page_2:newAction()
     :title("Cape")
-    :texture(textures["model.icons"],32 ,32 ,16, 16)
+    :texture(textures["other_textures.icons"],32 ,32 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.Cape
+        pe_selction(models.model.Cape)
         log("Cape")
-        pe_pos = models.model.Cape:getPos()
-        pe_rot = models.model.Cape:getRot()
     end)
 
-local action = pe_page_2:newAction()
+action = pe_page_2:newAction()
     :title("Elytra")
-    :texture(textures["model.icons"],48 ,32 ,16, 16)
+    :texture(textures["other_textures.icons"],48 ,32 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selected = models.model.Elytra.LeftElytra
+        pe_selction(models.model.Elytra.LeftElytra)
         log("Left Wing")
-        pe_pos = models.model.Elytra.LeftElytra:getPos()
-        pe_rot = models.model.Elytra.LeftElytra:getRot()
     end)
     :onRightClick(function()
-        pe_selected = models.model.Elytra.RightElytra
+        pe_selction(models.model.Elytra.RightElytra)
         log("Right Wing")
-        pe_pos = models.model.Elytra.RightElytra:getPos()
-        pe_rot = models.model.Elytra.RightElytra:getRot()
     end)
 
+action = pe_page_2:newAction()
+    :title("Hands")
+    :texture(textures["other_textures.icons"],0 ,48 ,16, 16)
+    :hoverColor(HOVER)
+    :onRightClick(function()
+        pe_selction(models.model.root.LeftArm.LeftItemPivot)
+        log("Left Hand")
+    end)
+    :onLeftClick(function()
+        pe_selction(models.model.root.RightArm.RightItemPivot)
+        log("Right Hand")
+    end)
 
-
-local action = pe_page_2:newAction()
-    :title("End")
+action = pe_page_2:newAction()
+    :title("Back")
     :item("minecraft:barrier")
     :hoverColor(HOVER)
     :onLeftClick(function()
         action_wheel:setPage(pe_page)
         display_text:setText("Pose Editor")
     end)
-    :onRightClick(function()
-        log("Clear")
-    end)
-
-
 
 -- Action Functions
 function pings.breast_on()
