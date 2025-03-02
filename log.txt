@@ -33,3 +33,38 @@ ENTRIES
 
 25/02/27
  g: make project sync with figura backend
+
+ r: maybe made to sync? cannot test without second instance
+
+ l: want to add a hud for the system, currently struggling to get it to show
+
+25/02/28
+ g: want to work on another major feature i've been wanting to add just because i can
+    going add a "blood system", by measuring the player's health i want to apply various blood overlays to the model to correspond with damage
+    ie, if you're slightly hurt you might have some minor damage, some dirt around the legs, etc, but if you're half a heart you'll be soaked in red
+
+    also just remembered, won't do it now but need to update the f6 help docs
+
+ r: blood system finished, worked suprisingly well
+    added functions to merged two textures together into one, could be very useful in future projects
+
+25/03/02
+FUTURE GOALS AS DETERMINED IN THE SHOWER
+
+Config
+* restructure generally
+* blink use scroll to set between "auto", "eyes open", and "eyes closed"
+* blood also use scroll, "auto", "none", "lvl 1", "lvl 2", "lvl 3"
+
+PE
+* save load
+* config menu internally
+* specialized avatar for screenshots, removing certain features and allowing for multiple avatars to be posed at once
+* add hud
+
+Other
+* improve blink
+* outfit selection
+* more emotes
+* fix current emotes
+

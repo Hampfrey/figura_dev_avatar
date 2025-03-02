@@ -3,7 +3,9 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72)
 
-DRESS = false
+DRESS = true
+PE_KEYBOARD = 1
+BLOOD_HAIR_BACK = true
 
 -- Hide vanilla player
 vanilla_model.PLAYER:setVisible(false)
@@ -347,6 +349,7 @@ function pings.emoticon_reset()
 end
 
 function pings.emoticon_set()
+    log(current_emoticon)
     if current_emoticon == 1 then
         models.model.root.Head.Camera.Emoticon1:setVisible(true)
         models.model.root.Head.Camera.Emoticon2:setVisible(false)
@@ -443,34 +446,109 @@ function play_last_animation()
     if last_animation == "lean_left" then pings.lean_left() end
 end
 
+-- Blood
+overlay_name = "merged"
+enable_blood = true
+function texture_overlay(base, overlay, not_blank)
+    base_size = base:getDimensions()
+    local overlay_adjust = textures:copy(overlay_name .. "b", overlay)
+    if not BLOOD_HAIR_BACK and base:getName() == "skin" then -- Need to add dress exceptions
+        overlay_adjust:fill(31, 20, 9, 28, 0, 1, 0, 0)
+        overlay_adjust:fill(16, 20, 1, 28, 0, 1, 0, 0)
+        overlay_adjust:fill(29, 16, 6, 1, 0, 1, 0, 0)
+    end
+    local merged = textures:newTexture(overlay_name, 64, 64)
+    for y = 0, base_size.y - 1, 1 do
+        for x = 0, base_size.x  - 1, 1 do
+            local base_rgba = base:getPixel(x, y)
+            local overlay_rgba = overlay_adjust:getPixel(x, y)
+            merged:setPixel(x, y, base_rgba)
+            if overlay_rgba[4] ~= 0 and base_rgba[4] ~= 0 then
+                if overlay_rgba[4] == 1 then
+                    merged:setPixel(x, y, overlay_rgba)
+                else
+                    local r = average(base_rgba[1], overlay_rgba[1])
+                    local g = average(base_rgba[2], overlay_rgba[2])
+                    local b = average(base_rgba[3], overlay_rgba[3])
+                    local a = base_rgba[4]
+                    merged:setPixel(x, y, r, g, b, a)
+                end
+            end
+        end
+    end
+    overlay_name = overlay_name .. "a"
+    return merged
+end
+
+function average_color(color1, color2)
+    local r = average(color1[1], color2[1])
+    local g = average(color1[2], color2[2])
+    local b = average(color1[3], color2[3])
+    local a = color1[4]
+    return vec(r, g, b, a)
+end
+
+function average(a, b)
+    return (a + b) / 2
+end
+
+-- Generate Blood Textures
+texture_blood_lvl_1 = texture_overlay(textures["skin"], textures["other_textures.blood_lvl_1"], true)
+texture_blood_lvl_2 = texture_overlay(textures["skin"], textures["other_textures.blood_lvl_2"], true)
+texture_blood_lvl_3 = texture_overlay(textures["skin"], textures["other_textures.blood_lvl_3"], true)
+
+texture_extra_blood_lvl_1 = texture_overlay(textures["extra"], textures["other_textures.extra_blood_lvl_1"], true)
+texture_extra_blood_lvl_2 = texture_overlay(textures["extra"], textures["other_textures.extra_blood_lvl_2"], true)
+texture_extra_blood_lvl_3 = texture_overlay(textures["extra"], textures["other_textures.extra_blood_lvl_3"], true)
+
+function blood(health)
+    if health > 12 or not enable_blood then
+        models.model.root:setPrimaryTexture("PRIMARY")
+        models.model.root.Dress:setPrimaryTexture("PRIMARY")
+    elseif health > 8 then
+        models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_1)
+        models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_1)
+    elseif health > 4 then
+        models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_2)
+        models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_2)
+    else
+        models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_3)
+        models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_3)
+    end
+    models.model.root.Head.Camera:setPrimaryTexture("PRIMARY")
+end
+
+-- Blood Main
+function events.tick()
+    blood(player:getHealth())
+end
+
 -- Pose Editor
 local pe_key_activate = keybinds:newKeybind("PE Start", "key.keyboard.f7")
 
---[[
-local pe_key_forward = keybinds:newKeybind("PE Forward", "key.keyboard.home")
-local pe_key_backward = keybinds:newKeybind("PE Backward", "key.keyboard.end")
-local pe_key_left = keybinds:newKeybind("PE Left", "key.keyboard.delete")
-local pe_key_right = keybinds:newKeybind("PE Right", "key.keyboard.page.down")
-local pe_key_up = keybinds:newKeybind("PE Up", "key.keyboard.insert")
-local pe_key_down = keybinds:newKeybind("PE Down", "key.keyboard.page.up")
-local pe_key_mode = keybinds:newKeybind("PE Mode", "key.keyboard.up")
-local pe_key_space = keybinds:newKeybind("PE Space", "key.keyboard.right")
-local pe_key_scale = keybinds:newKeybind("PE Scale", "key.keyboard.left")
-local pe_key_gumball = keybinds:newKeybind("PE Gumball", "key.keyboard.down")
---]]
-
-local pe_key_forward = keybinds:newKeybind("PE Forward", "key.keyboard.up")
-local pe_key_backward = keybinds:newKeybind("PE Backward", "key.keyboard.down")
-local pe_key_left = keybinds:newKeybind("PE Left", "key.keyboard.left")
-local pe_key_right = keybinds:newKeybind("PE Right", "key.keyboard.right")
-local pe_key_up = keybinds:newKeybind("PE Up", "key.keyboard.slash")
-local pe_key_down = keybinds:newKeybind("PE Down", "key.keyboard.right.shift")
-local pe_key_mode = keybinds:newKeybind("PE Mode", "key.keyboard.right.control")
-local pe_key_space = keybinds:newKeybind("PE Space", "key.keyboard.comma")
-local pe_key_scale = keybinds:newKeybind("PE Scale", "key.keyboard.right.alt")
-local pe_key_gumball = keybinds:newKeybind("PE Gumball", "key.keyboard.period")
-
-
+if PE_KEYBOARD == 1 then
+    pe_key_forward = keybinds:newKeybind("PE Forward", "key.keyboard.home")
+    pe_key_backward = keybinds:newKeybind("PE Backward", "key.keyboard.end")
+    pe_key_left = keybinds:newKeybind("PE Left", "key.keyboard.delete")
+    pe_key_right = keybinds:newKeybind("PE Right", "key.keyboard.page.down")
+    pe_key_up = keybinds:newKeybind("PE Up", "key.keyboard.insert")
+    pe_key_down = keybinds:newKeybind("PE Down", "key.keyboard.page.up")
+    pe_key_mode = keybinds:newKeybind("PE Mode", "key.keyboard.up")
+    pe_key_update = keybinds:newKeybind("PE Update", "key.keyboard.right")
+    pe_key_scale = keybinds:newKeybind("PE Scale", "key.keyboard.left")
+    pe_key_gumball = keybinds:newKeybind("PE Gumball", "key.keyboard.down")
+elseif PE_KEYBOARD == 2 then
+    pe_key_forward = keybinds:newKeybind("PE Forward", "key.keyboard.up")
+    pe_key_backward = keybinds:newKeybind("PE Backward", "key.keyboard.down")
+    pe_key_left = keybinds:newKeybind("PE Left", "key.keyboard.left")
+    pe_key_right = keybinds:newKeybind("PE Right", "key.keyboard.right")
+    pe_key_up = keybinds:newKeybind("PE Up", "key.keyboard.slash")
+    pe_key_down = keybinds:newKeybind("PE Down", "key.keyboard.right.shift")
+    pe_key_mode = keybinds:newKeybind("PE Mode", "key.keyboard.right.control")
+    pe_key_update = keybinds:newKeybind("PE Update", "key.keyboard.comma")
+    pe_key_scale = keybinds:newKeybind("PE Scale", "key.keyboard.right.alt")
+    pe_key_gumball = keybinds:newKeybind("PE Gumball", "key.keyboard.period")
+end
 -- PE VARIABLES
 pe_selected = models.model.root.RightArm
 
@@ -513,10 +591,47 @@ function pe_edit(vector)
 end
 
 -- Pe Selection
-function pe_selction(part)
+function pe_selection(part)
     pe_selected = part
     pe_pos = part:getPos()
     pe_rot = part:getRot()
+end
+
+-- PINGS
+function pings.pe_update_pos(vec)
+    pe_selected:setPos(vec)
+end
+
+function pings.pe_update_rot(vec)
+    pe_selected:setRot(vec)
+end
+
+function pe_update()
+    pings.pe_update_pos(pe_pos)
+    pings.pe_update_rot(pe_rot)
+    log("updated to pos " .. tostring(pe_pos) .. ", and rot " .. tostring(pe_rot))
+end
+
+function pe_set_zero(part)
+    part:setPos(0, 0, 0)
+    part:setRot(0, 0, 0)
+end
+
+function pings.pe_clear()
+    pe_set_zero(models.model.root)
+    pe_set_zero(models.model.root.Head)
+    pe_set_zero(models.model.root.Body)
+    pe_set_zero(models.model.root.LeftArm)
+    pe_set_zero(models.model.root.RightArm)
+    pe_set_zero(models.model.root.LeftLeg)
+    pe_set_zero(models.model.root.RightLeg)
+    pe_set_zero(models.model.root.Body.Breast)
+    pe_set_zero(models.model.root.Dress)
+    pe_set_zero(models.model.root.LeftArm.LeftItemPivot)
+    pe_set_zero(models.model.root.RightArm.RightItemPivot)
+    pe_set_zero(models.model.Cape)
+    pe_set_zero(models.model.Elytra.LeftElytra)
+    pe_set_zero(models.model.Elytra.RightElytra)
 end
 
 -- Gumball
@@ -539,27 +654,25 @@ function pe_func_activate()
     if pe_active then
         log("POSE EDITOR ENABLED")
         action_wheel:setPage(pe_page)
-        animations.model.freeze:play()
+        pings.pe_freeze()
     else
         log("POSE EDITOR DISABLED")
         action_wheel:setPage(main_page)
-        animations.model.freeze:stop()
+        pings.pe_unfreeze()
     end
 end
 pe_key_activate.press = pe_func_activate
 
--- Space
-function pe_func_space()
-    if pe_active then
-        pe_local_mode = not pe_local_mode
-        if pe_local_mode then
-            log("Local")
-        else
-            log("Global")
-        end
-    end
+function pings.pe_freeze()
+    animations.model.freeze:play()
 end
-pe_key_space.press = pe_func_space
+
+function pings.pe_unfreeze()
+    animations.model.freeze:stop()
+end
+
+-- Update
+pe_key_update.press = pe_update
 
 -- Scale
 function pe_func_scale()
@@ -672,54 +785,66 @@ action = pe_page:newAction(1)
     :texture(textures["other_textures.icons"], 0 , 0, 16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root.Head)
+        pe_update()
+        pings.pe_select_Head()
         log("Head")
     end)
+function pings.pe_select_Head() pe_selection(models.model.root.Head) end
 
 action = pe_page:newAction(8)
     :title("Body")
     :texture(textures["other_textures.icons"], 16 ,0 , 16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root.Body)
+        pe_update()
+        pings.pe_select_Body()
         log("Body")
     end)
+function pings.pe_select_Body() pe_selection(models.model.root.Body) end
 
 action = pe_page:newAction(2)
     :title("Left Arm")
     :texture(textures["other_textures.icons"],32 ,0 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root.LeftArm)
+        pe_update()
+        pings.pe_select_LeftArm()
         log("Left Arm")
     end)
+function pings.pe_select_LeftArm() pe_selection(models.model.root.LeftArm) end
 
 action = pe_page:newAction(7)
     :title("Right Arm")
     :texture(textures["other_textures.icons"],48 ,0 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root.RightArm)
+        pe_update()
+        pings.pe_select_RightArm()
         log("Right Arm")
     end)
+function pings.pe_select_RightArm() pe_selection(models.model.root.RightArm) end
 
 action = pe_page:newAction(3)
     :title("Left Leg")
     :texture(textures["other_textures.icons"],0 ,16 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root.LeftLeg)
+        pe_update()
+        pings.pe_select_LeftLeg()
         log("Left Leg")
     end)
+function pings.pe_select_LeftLeg() pe_selection(models.model.root.LeftLeg) end
 
 action = pe_page:newAction(6)
     :title("RightLeg")
     :texture(textures["other_textures.icons"],16 ,16 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root.RightLeg)
+        pe_update()
+        pings.pe_select_RightLeg()
         log("Right Leg")
     end)
+function pings.pe_select_RightLeg() pe_selection(models.model.root.RightLeg) end
 
 action = pe_page:newAction(4)
     :title("Other")
@@ -731,14 +856,15 @@ action = pe_page:newAction(4)
     end)
 
 action = pe_page:newAction(5)
-    :title("End")
+    :title("Exit (RMB Clear)")
     :item("minecraft:barrier")
     :hoverColor(HOVER)
     :onLeftClick(function()
         pe_func_activate()
     end)
     :onRightClick(function()
-        log("Clear")
+        pings.pe_clear()
+        log("Cleared!")
     end)
 
 -- Pose Editor Other
@@ -748,62 +874,78 @@ action = pe_page_2:newAction()
     :texture(textures["other_textures.icons"],48 ,16 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root.Dress)
+        pe_update()
+        pings.pe_select_Dress()
         log("Dress")
     end)
+function pings.pe_select_Dress() pe_selection(models.model.root.Dress) end
 
 action = pe_page_2:newAction()
     :title("Breast")
     :texture(textures["other_textures.icons"],0 ,32 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root.Body.Breast)
+        pe_update()
+        pings.pe_select_Breast()
         log("Breast")
     end)
+function pings.pe_select_Breast() pe_selection(models.model.root.Body.Breast) end
 
 action = pe_page_2:newAction()
-    :title("Root")
+    :title("Root (Warning, rotating this breaks gumball)")
     :texture(textures["other_textures.icons"],16 ,32 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.root)
+        pe_update()
+        pings.pe_select_root()
         log("Root")
     end)
+function pings.pe_select_root() pe_selection(models.model.root) end
 
 action = pe_page_2:newAction()
     :title("Cape")
     :texture(textures["other_textures.icons"],32 ,32 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.Cape)
+        pe_update()
+        pings.pe_select_Cape()
         log("Cape")
     end)
+function pings.pe_select_Cape() pe_selection(models.model.Cape) end
 
 action = pe_page_2:newAction()
-    :title("Elytra")
+    :title("Elytra (RMB for other side)")
     :texture(textures["other_textures.icons"],48 ,32 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
-        pe_selction(models.model.Elytra.LeftElytra)
+        pe_update()
+        pings.pe_select_LeftElytra()
         log("Left Wing")
     end)
     :onRightClick(function()
-        pe_selction(models.model.Elytra.RightElytra)
+        pe_update()
+        pings.pe_select_RightElytra()
         log("Right Wing")
     end)
+function pings.pe_select_LeftElytra() pe_selection(models.model.Elytra.LeftElytra) end
+function pings.pe_select_RightElytra() pe_selection(models.model.Elytra.RightElytra) end
 
 action = pe_page_2:newAction()
-    :title("Hands")
+    :title("Hands (RMB for other side)")
     :texture(textures["other_textures.icons"],0 ,48 ,16, 16)
     :hoverColor(HOVER)
     :onRightClick(function()
-        pe_selction(models.model.root.LeftArm.LeftItemPivot)
+        pe_update()
+        pings.pe_select_LeftItemPivot()
         log("Left Hand")
     end)
     :onLeftClick(function()
-        pe_selction(models.model.root.RightArm.RightItemPivot)
+        pe_update()
+        pings.pe_select_RightItemPivot()
         log("Right Hand")
     end)
+function pings.pe_select_LeftItemPivot() pe_selection(models.model.root.LeftArm.LeftItemPivot) end
+function pings.pe_select_RightItemPivot() pe_selection(models.model.root.RightArm.RightItemPivot) end
 
 action = pe_page_2:newAction()
     :title("Back")
@@ -839,6 +981,14 @@ end
 function pings.blush_off()
     models.model.root.Head.MainExpression:setVisible(true) 
     models.model.root.Head.SecondaryExpression:setVisible(false)
+end
+
+function pings.blood_on()
+    enable_blood = true
+end
+
+function pings.blood_off()
+    enable_blood = false
 end
 
 function check_toggles()
@@ -955,13 +1105,13 @@ config_page:newAction()
     :onUntoggle(pings.cape_off)
 
 config_page:newAction()
-    :title("Disable")
-    :toggleTitle("Enable")
-    :item("minecraft:heart_of_the_sea")
+    :title("Blood Off")
+    :toggleTitle("Blood On")
+    :item("minecraft:redstone")
     :hoverColor(HOVER)
     :toggleColor(RED)
-    :onToggle(pings.breast_off)
-    :onUntoggle(pings.breast_on)
+    :onToggle(pings.blood_off)
+    :onUntoggle(pings.blood_on)
 
 config_page:newAction()
     :title("Armor")
@@ -985,10 +1135,10 @@ config_page:newAction()
         elseif current_emoticon > 4 then
             current_emoticon = 1
         end
-        if current_emoticon == 1 then self:title("Emoticon (\" ! \")") end 
-        if current_emoticon == 2 then self:title("Emoticon (\" ? \")") end 
-        if current_emoticon == 3 then self:title("Emoticon (\" :3 \")") end 
-        if current_emoticon == 4 then self:title("Emoticon (\" :) \")") end
+        if current_emoticon == 1 then self:title("Emoticon (\" ! \")") log("1") end 
+        if current_emoticon == 2 then self:title("Emoticon (\" ? \")") log("2") end 
+        if current_emoticon == 3 then self:title("Emoticon (\" :3 \")") log("3") end 
+        if current_emoticon == 4 then self:title("Emoticon (\" :) \")") log("4") end
     end)
 
 config_page:newAction()
