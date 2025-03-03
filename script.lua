@@ -3,8 +3,9 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72)
 
-DRESS = true
-PE_KEYBOARD = 1
+DRESS = false
+PE_KEYBOARD = 2
+PE_FORMAT = "format_default"
 BLOOD_HAIR_BACK = true
 
 -- Hide vanilla player
@@ -54,7 +55,7 @@ config_page = action_wheel:newPage()
 config_page_2 = action_wheel:newPage()
 action_wheel:setPage(main_page)
 
--- List Functions
+-- Universal Functions
 function remove_val_from(input_table, val)
     for i = #input_table, 1, -1 do 
         if input_table[i] == val then
@@ -62,6 +63,15 @@ function remove_val_from(input_table, val)
         end
     end
     return input_table
+end
+
+local function split(str, delimiter) -- Courtesy of u/luascriptdev
+    local returnTable = {}
+    for k, v in string.gmatch(str, "([^" .. delimiter .. "]+)") 
+    do
+        returnTable[#returnTable+1] = k
+    end
+    return returnTable
 end
 
 -- Armor
@@ -96,7 +106,7 @@ function pings.armor_off()
 end
 
 function pings.helmet_on()
-    multimodel_stop_all()
+    if not pe_active then multimodel_stop_all() end
     vanilla_model.HELMET:setVisible(true)
 end
 
@@ -105,7 +115,7 @@ function pings.helmet_off()
 end
 
 function pings.chestplate_on()
-    multimodel_stop_all()
+    if not pe_active then multimodel_stop_all() end
     vanilla_model.CHESTPLATE:setVisible(true)
     pings.breast_off()
 end
@@ -116,7 +126,7 @@ function pings.chestplate_off()
 end
 
 function pings.leggings_on()
-    multimodel_stop_all()
+    if not pe_active then multimodel_stop_all() end
     vanilla_model.LEGGINGS:setVisible(true)
 end
 
@@ -125,7 +135,7 @@ function pings.leggings_off()
 end
 
 function pings.boots_on()
-    multimodel_stop_all()
+    if not pe_active then multimodel_stop_all() end
     vanilla_model.BOOTS:setVisible(true)
 end
 
@@ -270,68 +280,42 @@ function multimodel_stop(animation)
     --log("stopped " .. tostring(animation))
 end
 
--- State
-sleep = true
-function events.tick()
-    local recent_state = player:getPose()
-    -- Sleep
-    if last_state ~= recent_state then
-        --log("---")
-        --log("Change")
-        if recent_state == "SLEEPING" then
-            --log("slept")
-            pings.sleep_on()
-        else
-            --log("not sleep")
-            pings.sleep_off()
-        end
-        if recent_state == "STANDING" then
-            --log("stood")
-        end
-    end
-    last_state = recent_state
-end
-
-function pings.sleep_on()
-    sleeping = true
-    animations.model.blink:play()
-    animations.model.blink:pause()
-end 
-
-function pings.sleep_off()
-    sleeping = false
-    animations.model.blink:stop()
-end
-
 -- Blink script
-blink = true
+blink = 1
 blink_timer = 0
 blink_at = 3  --seconds to wait before blink
 SPS = 1 --amount of seconds in second (sps)
 
--- Add any animations that uses controlled facial expressions to the "if"
 function pings.blink() 
-    if blink and animations.model.curl_end:isStopped() and animations.model.sit_block_top_end:isStopped() and animations.model.stretch:isStopped() and animations.model.sleep:isStopped() and not sleeping then
+    if not models.model.root.Head.MainExpression.MainFacialExpression:overrideVanillaRot() then
         multimodel_play("blink")
     end
 end
 
 -- Code for blink
 function events.tick()
-    -- Blink
-    blink_timer = blink_timer + SPS
-    if blink_timer >= blink_at*20 then
-        pings.blink()
-        blink_timer = 0
+    if blink == 1 then
+        -- Blink
+        blink_timer = blink_timer + SPS
+        if blink_timer >= blink_at*20 then
+            pings.blink()
+            blink_timer = 0
+        end
+        blink_clock_timer = math.floor((blink_timer / 20) / 60) .. ':' .. math.floor(blink_timer / 20 / 10) - math.floor((blink_timer / 20) / 60) * 6 .. math.floor((blink_timer / 20) - math.floor(blink_timer / 20 / 10 ) * 10)
+        if world:getTime() == math.floor((world:getTime()) / 20) * 20 then
+            pings.syncTimer(math.floor(blink_timer / 20))
+        end
+    elseif blink == 2 then -- currently has a bug when it comes to animations that use eyes
+        animations.model.blink:setPlaying(true)
+        animations.model.blink:pause()
+    elseif blink == 3 then
+        animations.model.blink:setPlaying(false)
     end
-    blink_clock_timer = math.floor((blink_timer / 20) / 60) .. ':' .. math.floor(blink_timer / 20 / 10) - math.floor((blink_timer / 20) / 60) * 6 .. math.floor((blink_timer / 20) - math.floor(blink_timer / 20 / 10 ) * 10)
-    if world:getTime() == math.floor((world:getTime()) / 20) * 20 then
-        pings.syncTimer(math.floor(blink_timer / 20))
+end
 
-        -- Debug Options
-        --log((math.floor((blink_timer) / 40) * 40) + 10)
-        --printJson('[{"text":"Time", "color":"#8800ff"}, {"text":"' .. BlinkclockTimer .. '","color":"#ffaaaa"}]')
-    end
+function pings.blink_set(setting)
+    blink = setting
+    animations.model.blink:stop()
 end
 
 function pings.syncTimer(tick)
@@ -390,26 +374,26 @@ function animation_end()
     if action_wheel:isEnabled() and main_page == action_wheel:getCurrentPage() then
         -- Other
         if anim_is_active(animations.model.curl) then pings.curl() end
-        if animations.model.handstand:isPlaying() then pings.handstand() end
+        if anim_is_active(animations.model.handstand) then pings.handstand() end
 
         -- Sits
-        if animations.model.sit_floor:isPlaying() then pings.sit_floor() end
-        if animations.model.sit_slab:isPlaying() then pings.sit_slab() end
-        if animations.model.sit_slab_shy:isPlaying() then pings.sit_slab_shy() end
-        if animations.model.sit_slab_sprawl:isPlaying() then pings.sit_slab_sprawl() end
-	if animations.model.sit_stairs:isPlaying() then pings.sit_stairs() end
-        if animations.model.sit_block:isPlaying() then pings.sit_block() end
-        if animations.model.sit_block_top:isPlaying() then pings.sit_block_top() end
-        if animations.model.sit_wall:isPlaying() then pings.sit_wall() end
-        if animations.model.sit_wall_shy:isPlaying() then pings.sit_wall_shy() end
+        if anim_is_active(animations.model.sit_floor) then pings.sit_floor() end
+        if anim_is_active(animations.model.sit_slab) then pings.sit_slab() end
+        if anim_is_active(animations.model.sit_slab_shy) then pings.sit_slab_shy() end
+        if anim_is_active(animations.model.sit_slab_sprawl) then pings.sit_slab_sprawl() end
+	if anim_is_active(animations.model.sit_stairs) then pings.sit_stairs() end
+        if anim_is_active(animations.model.sit_block) then pings.sit_block() end
+        if anim_is_active(animations.model.sit_block_top) then pings.sit_block_top() end
+        if anim_is_active(animations.model.sit_wall) then pings.sit_wall() end
+        if anim_is_active(animations.model.sit_wall_shy) then pings.sit_wall_shy() end
 
         -- Leans
-        if animations.model.lean_fence:isPlaying() then pings.lean_fence() end
-        if animations.model.lean_forward:isPlaying() then pings.lean_forward() end
-        if animations.model.lean_backward:isPlaying() then pings.lean_backward() end
-        if animations.model.lean_backward_arms_up:isPlaying() then pings.lean_backward_arms_up() end
-        if animations.model.lean_right:isPlaying() then pings.lean_right() end
-        if animations.model.lean_left:isPlaying() then pings.lean_left() end
+        if anim_is_active(animations.model.lean_fence) then pings.lean_fence() end
+        if anim_is_active(animations.model.lean_forward) then pings.lean_forward() end
+        if anim_is_active(animations.model.lean_backward) then pings.lean_backward() end
+        if anim_is_active(animations.model.lean_backward_arms_up) then pings.lean_backward_arms_up() end
+        if anim_is_active(animations.model.lean_right) then pings.lean_right() end
+        if anim_is_active(animations.model.lean_left) then pings.lean_left() end
     end
 end
 local animation_end_key = keybinds:newKeybind("End Animations", "key.mouse.right")
@@ -438,7 +422,7 @@ function play_last_animation()
     if last_animation == "sleep" then pings.sleep() end
 
     -- Leans
-    if last_animation == "lean_fence:" then pings.lean_fence() end
+    if last_animation == "lean_fence" then pings.lean_fence() end
     if last_animation == "lean_forward" then pings.lean_forward() end
     if last_animation == "lean_backward" then pings.lean_backward() end
     if last_animation == "lean_backward_arms_up" then pings.lean_backward_arms_up() end
@@ -447,8 +431,8 @@ function play_last_animation()
 end
 
 -- Blood
+blood_setting = 1
 overlay_name = "merged"
-enable_blood = true
 function texture_overlay(base, overlay, not_blank)
     base_size = base:getDimensions()
     local overlay_adjust = textures:copy(overlay_name .. "b", overlay)
@@ -502,20 +486,38 @@ texture_extra_blood_lvl_2 = texture_overlay(textures["extra"], textures["other_t
 texture_extra_blood_lvl_3 = texture_overlay(textures["extra"], textures["other_textures.extra_blood_lvl_3"], true)
 
 function blood(health)
-    if health > 12 or not enable_blood then
+    if blood_setting == 1 then
+        if health > 12 then
+            models.model.root:setPrimaryTexture("PRIMARY")
+            models.model.root.Dress:setPrimaryTexture("PRIMARY")
+        elseif health > 8 then
+            models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_1)
+            models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_1)
+        elseif health > 4 then
+            models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_2)
+            models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_2)
+        else
+            models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_3)
+            models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_3)
+        end
+    elseif blood_setting == 2 then
         models.model.root:setPrimaryTexture("PRIMARY")
         models.model.root.Dress:setPrimaryTexture("PRIMARY")
-    elseif health > 8 then
+    elseif blood_setting == 3 then
         models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_1)
         models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_1)
-    elseif health > 4 then
+     elseif blood_setting == 4 then
         models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_2)
         models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_2)
-    else
+    elseif blood_setting == 5 then
         models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_3)
         models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_3)
     end
     models.model.root.Head.Camera:setPrimaryTexture("PRIMARY")
+end
+
+function pings.blood_set(setting)
+    blood_setting = setting
 end
 
 -- Blood Main
@@ -549,6 +551,7 @@ elseif PE_KEYBOARD == 2 then
     pe_key_scale = keybinds:newKeybind("PE Scale", "key.keyboard.right.alt")
     pe_key_gumball = keybinds:newKeybind("PE Gumball", "key.keyboard.period")
 end
+
 -- PE VARIABLES
 pe_selected = models.model.root.RightArm
 
@@ -646,6 +649,71 @@ function events.tick()
     else
         models.model.Gumball:setVisible(false)
     end
+end
+
+-- Export and Load
+function pe_export()
+    export = PE_FORMAT
+    export = export .. pe_get_part(models.model.root)
+    export = export .. pe_get_part(models.model.root.Head)
+    export = export .. pe_get_part(models.model.root.Body)
+    export = export .. pe_get_part(models.model.root.LeftArm)
+    export = export .. pe_get_part(models.model.root.RightArm)
+    export = export .. pe_get_part(models.model.root.LeftLeg)
+    export = export .. pe_get_part(models.model.root.RightLeg)
+    export = export .. pe_get_part(models.model.root.Body.Breast)
+    export = export .. pe_get_part(models.model.root.Dress)
+    export = export .. pe_get_part(models.model.root.LeftArm.LeftItemPivot)
+    export = export .. pe_get_part(models.model.root.RightArm.RightItemPivot)
+    export = export .. pe_get_part(models.model.Cape)
+    export = export .. pe_get_part(models.model.Elytra.LeftElytra)
+    export = export .. pe_get_part(models.model.Elytra.RightElytra)
+    
+    log("Exported to Clipboard!")
+    host:setClipboard(export)
+end
+
+function pe_load_func()
+    local data = host:getClipboard()
+    pings.pe_load(data)
+end
+
+function pings.pe_load(data)
+    log("Loaded from Clipboard!")
+    load = split(data, "|")
+    if load[1] == PE_FORMAT then
+        pe_set_and_convert_part(models.model.root, load[2])
+        pe_set_and_convert_part(models.model.root.Head, load[3])
+        pe_set_and_convert_part(models.model.root.Body, load[4])
+        pe_set_and_convert_part(models.model.root.LeftArm, load[5])
+        pe_set_and_convert_part(models.model.root.RightArm, load[6])
+        pe_set_and_convert_part(models.model.root.LeftLeg, load[7])
+        pe_set_and_convert_part(models.model.root.RightLeg, load[8])
+        pe_set_and_convert_part(models.model.root.Body.Breast, load[9])
+        pe_set_and_convert_part(models.model.root.Dress, load[10])
+        pe_set_and_convert_part(models.model.root.LeftArm.LeftItemPivot, load[11])
+        pe_set_and_convert_part(models.model.root.RightArm.RightItemPivot, load[12])
+        pe_set_and_convert_part(models.model.Cape, load[13])
+        pe_set_and_convert_part(models.model.Elytra.LeftElytra, load[14])
+        pe_set_and_convert_part(models.model.Elytra.RightElytra, load[15])
+    else
+        log("Assumed improper data!")
+    end
+end
+
+function pe_set_and_convert_part(part, data)
+    data = string.gsub(data, "{", "")
+    data = string.gsub(data, "}", "")
+    data = string.gsub(data, ":", ", ")
+    data_table = split(data, ", ")
+    part:setPos(data_table[1], data_table[2], data_table[3])
+    part:setRot(data_table[4], data_table[5], data_table[6])
+end
+
+function pe_get_part(part)
+    pos = part:getPos(0, 0, 0)
+    rot = part:getRot(0, 0, 0)
+    return "|" .. tostring(pos) .. ":" .. tostring(rot)
 end
 
 -- Activate
@@ -847,13 +915,18 @@ action = pe_page:newAction(6)
 function pings.pe_select_RightLeg() pe_selection(models.model.root.RightLeg) end
 
 action = pe_page:newAction(4)
-    :title("Other")
+    :title("Other (RMB Config)")
     :texture(textures["other_textures.icons"],32 ,16 ,16, 16)
     :hoverColor(HOVER)
     :onLeftClick(function()
         action_wheel:setPage(pe_page_2)
         display_text:setText("Pose Editor Other")
     end)
+    :onRightClick(function()
+        action_wheel:setPage(config_page)
+        display_text:setText("Config")
+    end)
+
 
 action = pe_page:newAction(5)
     :title("Exit (RMB Clear)")
@@ -863,6 +936,7 @@ action = pe_page:newAction(5)
         pe_func_activate()
     end)
     :onRightClick(function()
+        pe_export()
         pings.pe_clear()
         log("Cleared!")
     end)
@@ -948,6 +1022,13 @@ function pings.pe_select_LeftItemPivot() pe_selection(models.model.root.LeftArm.
 function pings.pe_select_RightItemPivot() pe_selection(models.model.root.RightArm.RightItemPivot) end
 
 action = pe_page_2:newAction()
+    :title("Export to Clipboard (RMB Load)")
+    :texture(textures["other_textures.icons"],16 ,48 ,16, 16)
+    :hoverColor(HOVER)
+    :onLeftClick(pe_export)
+    :onRightClick(pe_load_func)
+
+action = pe_page_2:newAction()
     :title("Back")
     :item("minecraft:barrier")
     :hoverColor(HOVER)
@@ -981,14 +1062,6 @@ end
 function pings.blush_off()
     models.model.root.Head.MainExpression:setVisible(true) 
     models.model.root.Head.SecondaryExpression:setVisible(false)
-end
-
-function pings.blood_on()
-    enable_blood = true
-end
-
-function pings.blood_off()
-    enable_blood = false
 end
 
 function check_toggles()
@@ -1032,7 +1105,7 @@ local action = main_page:newAction()
     :title("Config")
     :onLeftClick(function()
         action_wheel:setPage(config_page)
-        display_text:setText("Config 1/2")
+        display_text:setText("Config")
         config_position = 1
     end)
     :hoverColor(HOVER)
@@ -1071,29 +1144,27 @@ config_page:newAction()
     :onUntoggle(pings.blush_off)
 
 config_page:newAction()
-    :title("Blink Disable")
-    :toggleTitle("Blink Enable")
+    :title("Blink Auto")
     :item("minecraft:ender_eye")
     :hoverColor(HOVER)
-    :toggleColor(RED)
-    :onToggle(function() 
-        blink = false
-    end)
-    :onUntoggle(function() 
-        blink = true
+    :setOnScroll(function(dir, self)
+        blink = blink - dir
+        if blink < 1 then
+            blink = 3
+        elseif blink > 3 then
+            blink = 1
+        end
+        if blink == 1 then self:title("Blink Auto") end 
+        if blink == 2 then self:title("Eyes Closed") end 
+        if blink == 3 then self:title("Eyes Open") end 
+        pings.blink_set(blink)
     end)
 
 config_page:newAction()
-    :title("Sleepy")
-    :item("minecraft:ender_pearl")
+    :title("nothing")
+    --:item("minecraft:ender_pearl")
     :hoverColor(HOVER)
-    :onLeftClick(function()
-        if sleeping then
-            pings.sleep_off()
-        else
-            pings.sleep_on()
-        end
-    end)
+
 
 config_page:newAction()
     :title("Cape Enable")
@@ -1105,13 +1176,24 @@ config_page:newAction()
     :onUntoggle(pings.cape_off)
 
 config_page:newAction()
-    :title("Blood Off")
-    :toggleTitle("Blood On")
+    :title("Blood Auto")
     :item("minecraft:redstone")
     :hoverColor(HOVER)
-    :toggleColor(RED)
-    :onToggle(pings.blood_off)
-    :onUntoggle(pings.blood_on)
+    :setOnScroll(function(dir, self)
+        blood_setting = blood_setting - dir
+        if blood_setting < 1 then
+            blood_setting = 5
+        elseif blood_setting > 5 then
+            blood_setting = 1
+        end
+        if blood_setting == 1 then self:title("Blood Auto") end 
+        if blood_setting == 2 then self:title("Blood Off") end 
+        if blood_setting == 3 then self:title("Blood Lvl 1") end 
+        if blood_setting == 4 then self:title("Blood Lvl 2") end
+        if blood_setting == 4 then self:title("Blood Lvl 3") end
+        pings.blood_set(blood_setting)
+    end)
+
 
 config_page:newAction()
     :title("Armor")
@@ -1145,8 +1227,13 @@ config_page:newAction()
     :title("Go Back")
     :item("minecraft:barrier")
     :onLeftClick(function()
-        action_wheel:setPage(main_page)
-        display_text:setText("Main")
+        if pe_active then
+            action_wheel:setPage(pe_page)
+            display_text:setText("Pose Editor")
+        else
+            action_wheel:setPage(main_page)
+            display_text:setText("Main")
+        end
     end)
     :hoverColor(HOVER)
 
@@ -1230,9 +1317,8 @@ config_page_2:newAction(8)
     :title("Go Back")
     :item("minecraft:barrier")
     :onLeftClick(function()
-        action_wheel:setPage(main_page)
-        display_text:setText("Main")
-        config_position = 1
+        action_wheel:setPage(config_page)
+        display_text:setText("Config Page")
     end)
     :hoverColor(HOVER)
 

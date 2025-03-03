@@ -48,23 +48,34 @@ ENTRIES
  r: blood system finished, worked suprisingly well
     added functions to merged two textures together into one, could be very useful in future projects
 
-25/03/02
+25/03/01
 FUTURE GOALS AS DETERMINED IN THE SHOWER
 
 Config
 * restructure generally
-* blink use scroll to set between "auto", "eyes open", and "eyes closed"
-* blood also use scroll, "auto", "none", "lvl 1", "lvl 2", "lvl 3"
+- blink use scroll to set between "auto", "eyes open", and "eyes closed"
+- blood also use scroll, "auto", "none", "lvl 1", "lvl 2", "lvl 3"
 
 PE
-* save load
-* config menu internally
+- save load
+- config menu internally
 * specialized avatar for screenshots, removing certain features and allowing for multiple avatars to be posed at once
 * add hud
 
 Other
-* improve blink
+- improve blink
 * outfit selection
 * more emotes
 * fix current emotes
 
+25/03/02
+ g: blink and blood config settings
+
+ r: done
+
+ l: make sure working between clients
+
+25/03/03
+ g: add PE export and load using the clipboard
+ 
+ r: that's done
