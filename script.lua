@@ -4,7 +4,7 @@ RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72)
 
 DRESS = false
-PE_KEYBOARD = 2
+PE_KEYBOARD = 1
 PE_FORMAT = "format_default"
 BLOOD_HAIR_BACK = true
 
@@ -333,7 +333,6 @@ function pings.emoticon_reset()
 end
 
 function pings.emoticon_set()
-    log(current_emoticon)
     if current_emoticon == 1 then
         models.model.root.Head.Camera.Emoticon1:setVisible(true)
         models.model.root.Head.Camera.Emoticon2:setVisible(false)
@@ -365,7 +364,6 @@ local help_key = keybinds:newKeybind("Print Help", "key.keyboard.f6")
 help_key.press = help
 
 -- Auto End
-
 function anim_is_active(anim)
     return anim:isPlaying() or anim:isHolding()
 end
@@ -506,7 +504,7 @@ function blood(health)
     elseif blood_setting == 3 then
         models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_1)
         models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_1)
-     elseif blood_setting == 4 then
+    elseif blood_setting == 4 then
         models.model.root:setPrimaryTexture("CUSTOM", texture_blood_lvl_2)
         models.model.root.Dress:setPrimaryTexture("CUSTOM", texture_extra_blood_lvl_2)
     elseif blood_setting == 5 then
@@ -552,7 +550,7 @@ elseif PE_KEYBOARD == 2 then
     pe_key_gumball = keybinds:newKeybind("PE Gumball", "key.keyboard.period")
 end
 
--- PE VARIABLES
+-- Pe Variables
 pe_selected = models.model.root.RightArm
 
 pe_active = false
@@ -600,7 +598,7 @@ function pe_selection(part)
     pe_rot = part:getRot()
 end
 
--- PINGS
+-- Pe Pings
 function pings.pe_update_pos(vec)
     pe_selected:setPos(vec)
 end
@@ -612,7 +610,7 @@ end
 function pe_update()
     pings.pe_update_pos(pe_pos)
     pings.pe_update_rot(pe_rot)
-    log("updated to pos " .. tostring(pe_pos) .. ", and rot " .. tostring(pe_rot))
+    log("§7    " .. tostring(pe_selected:getName()) .. " updated to pos " .. tostring(pe_pos) .. ", and rot " .. tostring(pe_rot))
 end
 
 function pe_set_zero(part)
@@ -621,6 +619,7 @@ function pe_set_zero(part)
 end
 
 function pings.pe_clear()
+    log("§c§lCleared!")
     pe_set_zero(models.model.root)
     pe_set_zero(models.model.root.Head)
     pe_set_zero(models.model.root.Body)
@@ -669,17 +668,22 @@ function pe_export()
     export = export .. pe_get_part(models.model.Elytra.LeftElytra)
     export = export .. pe_get_part(models.model.Elytra.RightElytra)
     
-    log("Exported to Clipboard!")
+    log("§9§lExported to Clipboard!")
     host:setClipboard(export)
 end
 
 function pe_load_func()
     local data = host:getClipboard()
-    pings.pe_load(data)
+    if #data < 512 then 
+        pings.pe_load(data)
+    else
+        log("    §cLoad failure, §lDATA OVERSIZE " .. tostring(#data) .. "/512")
+    end
 end
 
+pe_check = 0
+
 function pings.pe_load(data)
-    log("Loaded from Clipboard!")
     load = split(data, "|")
     if load[1] == PE_FORMAT then
         pe_set_and_convert_part(models.model.root, load[2])
@@ -696,19 +700,44 @@ function pings.pe_load(data)
         pe_set_and_convert_part(models.model.Cape, load[13])
         pe_set_and_convert_part(models.model.Elytra.LeftElytra, load[14])
         pe_set_and_convert_part(models.model.Elytra.RightElytra, load[15])
+
+        log("§9§lLoaded from Clipboard! " .. tostring(pe_check) .. "/" .. "14 successful")
     else
-        log("Assumed improper data!")
+        log("    §cLoad failure, §lNO TAG")
     end
+    pe_check = 0
 end
 
 function pe_set_and_convert_part(part, data)
-    data = string.gsub(data, "{", "")
-    data = string.gsub(data, "}", "")
-    data = string.gsub(data, ":", ", ")
-    data_table = split(data, ", ")
-   
-    part:setPos(data_table[1], data_table[2], data_table[3])
-    part:setRot(data_table[4], data_table[5], data_table[6])
+    if data ~= nil then
+        data = string.gsub(data, "{", "")
+        data = string.gsub(data, "}", "")
+        data = string.gsub(data, ":", ", ")
+        data_table = split(data, ", ")
+
+        if pe_check_data(data_table) then
+            part:setPos(data_table[1], data_table[2], data_table[3])
+            part:setRot(data_table[4], data_table[5], data_table[6])
+            pe_check = pe_check + 1
+        else
+            log("    §c" .. part:getName() .. " failed to load, §lNUMBER ISSUE")
+        end
+    else
+        log("    §c" .. part:getName() .. " failed to load, §lNO DATA")
+    end
+end
+
+function pe_check_data(data)
+    local check = 0
+    for i = 1, #data, 1 do
+        local data_point = data[i]
+        data_point = tonumber(data_point)
+        if type(data_point) == "number" then
+            check = check + 1
+        end
+    end
+    if check == 6 then  end
+    return check == 6
 end
 
 function pe_get_part(part)
@@ -721,11 +750,11 @@ end
 function pe_func_activate()
     pe_active = not pe_active
     if pe_active then
-        log("POSE EDITOR ENABLED")
+        log("\n\n§lPOSE EDITOR ENABLED\n")
         action_wheel:setPage(pe_page)
         pings.pe_freeze()
     else
-        log("POSE EDITOR DISABLED")
+        log("\n\n§lPOSE EDITOR DISABLED\n")
         action_wheel:setPage(main_page)
         pings.pe_unfreeze()
     end
@@ -747,11 +776,11 @@ pe_key_update.press = pe_update
 function pe_func_scale()
     if pe_active then
         if pe_rot_scale == 15 then
-            log("Small")
+            log("§dSmall")
             pe_rot_scale = 1
             pe_pos_scale = 0.1
         else
-            log("Large")
+            log("§dLarge")
             pe_rot_scale = 15
             pe_pos_scale = 1
         end
@@ -764,9 +793,9 @@ function pe_func_mode()
     if pe_active then
         pe_pos_mode = not pe_pos_mode
         if pe_pos_mode then
-            log("Position")
+            log("§6Position")
         else
-            log("Rotation")
+            log("§6Rotation")
         end
     end
 end
@@ -777,16 +806,15 @@ function pe_func_gumball()
     if pe_active then
         pe_gumball = not pe_gumball
         if pe_gumball then
-            log("Gumball On")
+            log("§aGumball On")
         else
-            log("Gumball Off")
+            log("§aGumball Off")
         end
     end
 end
 pe_key_gumball.press = pe_func_gumball
 
 -- DIRECTIONS
-
 -- Forward
 function pe_func_forward()
     if pe_pos_mode then
@@ -937,9 +965,8 @@ action = pe_page:newAction(5)
         pe_func_activate()
     end)
     :onRightClick(function()
-        pe_export()
+        --pe_export()
         pings.pe_clear()
-        log("Cleared!")
     end)
 
 -- Pose Editor Other
@@ -1218,10 +1245,10 @@ config_page:newAction()
         elseif current_emoticon > 4 then
             current_emoticon = 1
         end
-        if current_emoticon == 1 then self:title("Emoticon (\" ! \")") log("1") end 
-        if current_emoticon == 2 then self:title("Emoticon (\" ? \")") log("2") end 
-        if current_emoticon == 3 then self:title("Emoticon (\" :3 \")") log("3") end 
-        if current_emoticon == 4 then self:title("Emoticon (\" :) \")") log("4") end
+        if current_emoticon == 1 then self:title("Emoticon (\" ! \")") end 
+        if current_emoticon == 2 then self:title("Emoticon (\" ? \")") end 
+        if current_emoticon == 3 then self:title("Emoticon (\" :3 \")") end 
+        if current_emoticon == 4 then self:title("Emoticon (\" :) \")") end
     end)
 
 config_page:newAction()

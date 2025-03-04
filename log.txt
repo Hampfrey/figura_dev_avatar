@@ -92,3 +92,8 @@ Fixes
  g: github?
 
  r: working!
+
+25/03/03
+ r: fresh coat of paint for pe, alongside error correction
+    pe load can now prevent false data, data oversize, data undersize, and wrong data errors
+    pe text descriptors now have special formatting and color
