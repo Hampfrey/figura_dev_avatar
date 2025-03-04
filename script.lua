@@ -706,6 +706,7 @@ function pe_set_and_convert_part(part, data)
     data = string.gsub(data, "}", "")
     data = string.gsub(data, ":", ", ")
     data_table = split(data, ", ")
+   
     part:setPos(data_table[1], data_table[2], data_table[3])
     part:setRot(data_table[4], data_table[5], data_table[6])
 end
