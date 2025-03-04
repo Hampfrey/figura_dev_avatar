@@ -1218,7 +1218,7 @@ config_page:newAction()
         if blood_setting == 2 then self:title("Blood Off") end 
         if blood_setting == 3 then self:title("Blood Lvl 1") end 
         if blood_setting == 4 then self:title("Blood Lvl 2") end
-        if blood_setting == 4 then self:title("Blood Lvl 3") end
+        if blood_setting == 5 then self:title("Blood Lvl 3") end
         pings.blood_set(blood_setting)
     end)
 
