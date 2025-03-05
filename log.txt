@@ -65,15 +65,17 @@ PE
 
 Other
 - improve blink
-> outfit selection
+> figure out what to do with that empty config slot
 > more emotes
 > add 4px arm compat
-> independent eye control.
+- independent eye control.
+> update f6 help doc
 
 Fixes
 > fix current emotes for dress
 > revert accidental sleeping removal
-> fix that dress rotation bug
+- fix that dress rotation bug
+- fix what happens when blink stacks with animations that use it
 > consider why arrows turned into pe hud assets once
 
 25/03/02
@@ -97,3 +99,13 @@ Fixes
  r: fresh coat of paint for pe, alongside error correction
     pe load can now prevent false data, data oversize, data undersize, and wrong data errors
     pe text descriptors now have special formatting and color
+
+25/03/05
+ g: do some fixes
+
+ r: fixed dress rot when pe active and inactive
+    fixed blink being weird using animation priority
+    added independent eye control
+
+ l: monitor eye control for bugs
+    update secondary face blink to match

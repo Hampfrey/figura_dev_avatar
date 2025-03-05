@@ -4,9 +4,9 @@ RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72)
 
 DRESS = false
-PE_KEYBOARD = 1
+PE_KEYBOARD = 2
 PE_FORMAT = "format_default"
-BLOOD_HAIR_BACK = true
+BLOOD_HAIR_BACK = false
 
 -- Hide vanilla player
 vanilla_model.PLAYER:setVisible(false)
@@ -172,6 +172,8 @@ function events.render()
     playing = remove_val_from(playing, animations.model.dress_move)
     playing = remove_val_from(playing, animations.model.dress_sit)
     playing = remove_val_from(playing, animations.model.dress_crouch)
+    playing = remove_val_from(playing, animations.model.blink_left)
+    playing = remove_val_from(playing, animations.model.blink_right)
     local playing_no_blink = remove_val_from(playing, animations.model.blink)
 
     local recent = playing_no_blink[1]
@@ -253,7 +255,7 @@ function events.tick()
 
         animations.model.dress_move:setPlaying(moving and not sitting)
         animations.model.dress_move:setSpeed(player:getVelocity().xz:length() * 5)
-        if not sitting and not pe_active then models.model.root.Dress:setRot(player:getVelocity().xz:length() * -30 * direction, 0, 0) end
+        if not sitting and not pe_active then models.model.root.Dress:setOffsetRot(player:getVelocity().xz:length() * -30 * direction, 0, 0) end
     end
 end
 
@@ -280,21 +282,30 @@ function multimodel_stop(animation)
     --log("stopped " .. tostring(animation))
 end
 
--- Blink script
+-- Blink
 blink = 1
 blink_timer = 0
 blink_at = 3  --seconds to wait before blink
 SPS = 1 --amount of seconds in second (sps)
 
+animations.model.blink_right:setPriority(-1)
+animations.model.blink_left:setPriority(-1)
+animations.model.blink:setPriority(-1)
+
 function pings.blink() 
-    if not models.model.root.Head.MainExpression.MainFacialExpression:overrideVanillaRot() then
-        multimodel_play("blink")
-    end
+    animations.model.blink:play()
+end
+
+function affecting_eyes() -- wildly lazy but i cannot figure out the logic here
+    return anim_is_active(animations.model.sleep) or anim_is_active(animations.model.sleep_end) or anim_is_active(animations.model.curl_end) or anim_is_active(animations.model.stretch)
 end
 
 -- Code for blink
 function events.tick()
     if blink == 1 then
+        animations.model.blink_right:setPlaying(false)
+        animations.model.blink_left:setPlaying(false)
+
         -- Blink
         blink_timer = blink_timer + SPS
         if blink_timer >= blink_at*20 then
@@ -306,9 +317,27 @@ function events.tick()
             pings.syncTimer(math.floor(blink_timer / 20))
         end
     elseif blink == 2 then -- currently has a bug when it comes to animations that use eyes
+        animations.model.blink_right:setPlaying(false)
+        animations.model.blink_left:setPlaying(false)
+
         animations.model.blink:setPlaying(true)
         animations.model.blink:pause()
-    elseif blink == 3 then
+    elseif blink == 3 then -- currently has a bug when it comes to animations that use eyes
+        animations.model.blink:setPlaying(false)
+        animations.model.blink_left:setPlaying(false)
+
+        animations.model.blink_right:setPlaying(true)
+        animations.model.blink_right:pause()
+    elseif blink == 4 then -- currently has a bug when it comes to animations that use eyes
+        animations.model.blink:setPlaying(false)
+        animations.model.blink_right:setPlaying(false)
+
+        animations.model.blink_left:setPlaying(true)
+        animations.model.blink_left:pause()
+    elseif blink == 5 then
+        animations.model.blink_right:setPlaying(false)
+        animations.model.blink_left:setPlaying(false)
+
         animations.model.blink:setPlaying(false)
     end
 end
@@ -1178,13 +1207,15 @@ config_page:newAction()
     :setOnScroll(function(dir, self)
         blink = blink - dir
         if blink < 1 then
-            blink = 3
-        elseif blink > 3 then
+            blink = 5
+        elseif blink > 5 then
             blink = 1
         end
         if blink == 1 then self:title("Blink Auto") end 
         if blink == 2 then self:title("Eyes Closed") end 
-        if blink == 3 then self:title("Eyes Open") end 
+        if blink == 3 then self:title("Right Eye Closed") end 
+        if blink == 4 then self:title("Left Eye Closed") end 
+        if blink == 5 then self:title("Eyes Open") end 
         pings.blink_set(blink)
     end)
 
