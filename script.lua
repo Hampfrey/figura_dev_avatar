@@ -5,7 +5,7 @@ HOVER = vec(0.96, 0.66, 0.72)
 
 DRESS = false
 PE_KEYBOARD = 2
-PE_FORMAT = "format_default"
+PE_SCALE = 2
 BLOOD_HAIR_BACK = false
 
 -- Hide vanilla player
@@ -553,6 +553,8 @@ function events.tick()
 end
 
 -- Pose Editor
+PE_FORMAT = "format_default"
+
 local pe_key_activate = keybinds:newKeybind("PE Start", "key.keyboard.f7")
 
 if PE_KEYBOARD == 1 then
@@ -594,9 +596,6 @@ pe_pos_scale = 1
 pe_pos = vec(0, 0, 0)
 pe_rot = vec(0, 0, 0)
 
--- PE OTHER
-models.model.Gumball:setPrimaryRenderType("CUTOUT_EMISSIVE_SOLID")
-
 -- Pe Edit
 function pe_edit(vector)
     if pe_active then
@@ -637,9 +636,11 @@ function pings.pe_update_rot(vec)
 end
 
 function pe_update()
-    pings.pe_update_pos(pe_pos)
-    pings.pe_update_rot(pe_rot)
-    log("§7    " .. tostring(pe_selected:getName()) .. " updated to pos " .. tostring(pe_pos) .. ", and rot " .. tostring(pe_rot))
+    if pe_active then
+        pings.pe_update_pos(pe_pos)
+        pings.pe_update_rot(pe_rot)
+        log("§7    " .. tostring(pe_selected:getName()) .. " updated to pos " .. tostring(pe_pos) .. ", and rot " .. tostring(pe_rot))
+    end
 end
 
 function pe_set_zero(part)
@@ -665,17 +666,41 @@ function pings.pe_clear()
     pe_set_zero(models.model.Elytra.RightElytra)
 end
 
--- Gumball
+-- HUD
+models.model.Hud:setScale(PE_SCALE, PE_SCALE, 1)
+
+models.model.Gumball:setPrimaryRenderType("CUTOUT_EMISSIVE_SOLID")
+models.model.Hud:setPrimaryRenderType("CUTOUT_EMISSIVE_SOLID")
+
+if PE_KEYBOARD == 1 then
+    models.model.Hud.BlockLaptop:setVisible(false) 
+    models.model.Hud.BlockHome:setVisible(true)
+
+    models.model.Hud.ButtonMode:setPos(0, -8, 0)
+    models.model.Hud.ButtonScale:setPos(0, -16, 0)
+    models.model.Hud.ButtonGumball:setPos(0, -24, 0)
+    models.model.Hud.ButtonSync:setPos(-16, -24, 0)
+    
+elseif PE_KEYBOARD == 2 then
+    models.model.Hud.BlockLaptop:setVisible(true) 
+    models.model.Hud.BlockHome:setVisible(false) 
+end
+
 function events.tick()
     if pe_active then
+        -- Gumball
         local pos = pe_selected:getPivot() + pe_selected:getTruePos() + pe_selected:getParent():getTruePos() + pe_selected:getParent():getParent():getTruePos() -- this is wildly messy but it works
-        models.model.Gumball:setVisible(pe_gumball)
+        models.model.Gumball:setVisible(pe_gumball and client:isHudEnabled())
         models.model.Gumball:setPos(pos)
         models.model.Gumball.Pos:setVisible(pe_pos_mode)
         models.model.Gumball.Rot:setVisible(not pe_pos_mode)
         models.model.Gumball.Rot:setRot(pe_selected:getAnimRot())
+
+        -- Hud
+        models.model.Hud:setVisible(true) 
     else
         models.model.Gumball:setVisible(false)
+        models.model.Hud:setVisible(false) 
     end
 end
 
@@ -806,10 +831,12 @@ function pe_func_scale()
     if pe_active then
         if pe_rot_scale == 15 then
             log("§dSmall")
+            models.model.Hud.ButtonScale:setScale(1, 1, -1)
             pe_rot_scale = 1
             pe_pos_scale = 0.1
         else
             log("§dLarge")
+            models.model.Hud.ButtonScale:setScale(1, 1, 1)
             pe_rot_scale = 15
             pe_pos_scale = 1
         end
@@ -822,8 +849,10 @@ function pe_func_mode()
     if pe_active then
         pe_pos_mode = not pe_pos_mode
         if pe_pos_mode then
+            models.model.Hud.ButtonMode:setScale(1, 1, 1)
             log("§6Position")
         else
+            models.model.Hud.ButtonMode:setScale(1, 1, -1)
             log("§6Rotation")
         end
     end
@@ -835,8 +864,10 @@ function pe_func_gumball()
     if pe_active then
         pe_gumball = not pe_gumball
         if pe_gumball then
+            models.model.Hud.ButtonGumball:setScale(1, 1, 1)
             log("§aGumball On")
         else
+            models.model.Hud.ButtonGumball:setScale(1, 1, -1)
             log("§aGumball Off")
         end
     end
@@ -849,7 +880,7 @@ function pe_func_forward()
     if pe_pos_mode then
         pe_edit(vec(0, 0, 1))
     else
-        pe_edit(vec(1, 0, 0))
+        pe_edit(vec(-1, 0, 0))
     end
 end
 pe_key_forward.press = pe_func_forward
@@ -859,7 +890,7 @@ function pe_func_backward()
     if pe_pos_mode then
         pe_edit(vec(0, 0, -1))
     else
-        pe_edit(vec(-1, 0, 0))
+        pe_edit(vec(1, 0, 0))
     end
 end
 pe_key_backward.press = pe_func_backward

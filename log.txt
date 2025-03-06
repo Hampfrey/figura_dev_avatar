@@ -109,3 +109,8 @@ Fixes
 
  l: monitor eye control for bugs
     update secondary face blink to match
+
+25/03/05
+ g: add hud to PE
+
+ r: hud added
