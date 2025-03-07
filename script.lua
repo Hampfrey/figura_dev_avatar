@@ -650,6 +650,8 @@ end
 
 function pings.pe_clear()
     log("§c§lCleared!")
+    pe_rot = vec(0, 0, 0)
+    pe_pos = vec(0, 0, 0)
     pe_set_zero(models.model.root)
     pe_set_zero(models.model.root.Head)
     pe_set_zero(models.model.root.Body)
@@ -672,6 +674,11 @@ models.model.Hud:setScale(PE_SCALE, PE_SCALE, 1)
 models.model.Gumball:setPrimaryRenderType("CUTOUT_EMISSIVE_SOLID")
 models.model.Hud:setPrimaryRenderType("CUTOUT_EMISSIVE_SOLID")
 
+pe_button_mode = models.model.Hud.ButtonMode.HighlightMode
+pe_button_update = models.model.Hud.ButtonUpdate.HighlightUpdate
+pe_button_scale = models.model.Hud.ButtonScale.HighlightScale
+pe_button_gumball = models.model.Hud.ButtonGumball.HighlightGumball
+
 if PE_KEYBOARD == 1 then
     models.model.Hud.BlockLaptop:setVisible(false) 
     models.model.Hud.BlockHome:setVisible(true)
@@ -679,11 +686,25 @@ if PE_KEYBOARD == 1 then
     models.model.Hud.ButtonMode:setPos(0, -8, 0)
     models.model.Hud.ButtonScale:setPos(0, -16, 0)
     models.model.Hud.ButtonGumball:setPos(0, -24, 0)
-    models.model.Hud.ButtonSync:setPos(-16, -24, 0)
+    models.model.Hud.ButtonUpdate:setPos(-16, -24, 0)
+
+    pe_button_forward = models.model.Hud.BlockHome.HighlightHomeForward
+    pe_button_backward = models.model.Hud.BlockHome.HighlightHomeBackward
+    pe_button_left = models.model.Hud.BlockHome.HighlightHomeLeft
+    pe_button_right = models.model.Hud.BlockHome.HighlightHomeRight
+    pe_button_up = models.model.Hud.BlockHome.HighlightHomeUp
+    pe_button_down = models.model.Hud.BlockHome.HighlightHomeDown
     
 elseif PE_KEYBOARD == 2 then
     models.model.Hud.BlockLaptop:setVisible(true) 
     models.model.Hud.BlockHome:setVisible(false) 
+
+    pe_button_forward = models.model.Hud.BlockLaptop.HighlightLaptopForward
+    pe_button_backward = models.model.Hud.BlockLaptop.HighlightLaptopBackward
+    pe_button_left = models.model.Hud.BlockLaptop.HighlightLaptopLeft
+    pe_button_right = models.model.Hud.BlockLaptop.HighlightLaptopRight
+    pe_button_up = models.model.Hud.BlockLaptop.HighlightLaptopUp
+    pe_button_down = models.model.Hud.BlockLaptop.HighlightLaptopDown
 end
 
 function events.tick()
@@ -698,6 +719,16 @@ function events.tick()
 
         -- Hud
         models.model.Hud:setVisible(true) 
+        pe_button_mode:setVisible(pe_key_mode:isPressed())
+        pe_button_scale:setVisible(pe_key_scale:isPressed())
+        pe_button_gumball:setVisible(pe_key_gumball:isPressed())
+        pe_button_update:setVisible(pe_key_update:isPressed())
+        pe_button_forward:setVisible(pe_key_forward:isPressed())
+        pe_button_backward:setVisible(pe_key_backward:isPressed())
+        pe_button_up:setVisible(pe_key_up:isPressed())
+        pe_button_down:setVisible(pe_key_down:isPressed())
+        pe_button_left:setVisible(pe_key_left:isPressed())
+        pe_button_right:setVisible(pe_key_right:isPressed())
     else
         models.model.Gumball:setVisible(false)
         models.model.Hud:setVisible(false) 
@@ -1242,11 +1273,11 @@ config_page:newAction()
         elseif blink > 5 then
             blink = 1
         end
-        if blink == 1 then self:title("Blink Auto") end 
-        if blink == 2 then self:title("Eyes Closed") end 
-        if blink == 3 then self:title("Right Eye Closed") end 
-        if blink == 4 then self:title("Left Eye Closed") end 
-        if blink == 5 then self:title("Eyes Open") end 
+        if blink == 1 then self:title("Blink Auto") self:item("minecraft:ender_eye") end 
+        if blink == 2 then self:title("Eyes Closed") self:item("minecraft:ender_pearl") end 
+        if blink == 3 then self:title("Right Eye Closed") self:item("minecraft:ender_pearl") end 
+        if blink == 4 then self:title("Left Eye Closed") self:item("minecraft:ender_pearl") end 
+        if blink == 5 then self:title("Eyes Open") self:item("minecraft:ender_pearl") end 
         pings.blink_set(blink)
     end)
 
@@ -1276,11 +1307,11 @@ config_page:newAction()
         elseif blood_setting > 5 then
             blood_setting = 1
         end
-        if blood_setting == 1 then self:title("Blood Auto") end 
-        if blood_setting == 2 then self:title("Blood Off") end 
-        if blood_setting == 3 then self:title("Blood Lvl 1") end 
-        if blood_setting == 4 then self:title("Blood Lvl 2") end
-        if blood_setting == 5 then self:title("Blood Lvl 3") end
+        if blood_setting == 1 then self:title("Blood Auto") self:item("minecraft:redstone") end 
+        if blood_setting == 2 then self:title("Blood Off") self:item("minecraft:redstone_block") end 
+        if blood_setting == 3 then self:title("Blood Lvl 1") self:item("minecraft:redstone_block") end 
+        if blood_setting == 4 then self:title("Blood Lvl 2") self:item("minecraft:redstone_block") end
+        if blood_setting == 5 then self:title("Blood Lvl 3") self:item("minecraft:redstone_block") end
         pings.blood_set(blood_setting)
     end)
 

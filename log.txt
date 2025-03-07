@@ -70,6 +70,7 @@ Other
 > add 4px arm compat
 - independent eye control.
 > update f6 help doc
+> camera control
 
 Fixes
 > fix current emotes for dress
@@ -114,3 +115,9 @@ Fixes
  g: add hud to PE
 
  r: hud added
+
+25/03/07
+ g: make hud do more things
+    camera control
+
+ r: hud now highlights currently pressed buttons
