@@ -118,6 +118,80 @@ Fixes
 
 25/03/07
  g: make hud do more things
-    camera control
 
  r: hud now highlights currently pressed buttons
+
+25/03/07
+
+PESUDO CODE FOR CAMERA ADJUSTMENT
+    Activate with open button on config
+    Show PE hud, without the 4 settings buttons
+    Show 2 settings buttons for camera control
+    Move Position of Hud for laptop config
+    For each of 6 PE controls, add overarching ...
+
+    `if camera_control_active then	` 
+    `    camera_edit(CONTROL VECTOR)	`
+    `else				`
+    `    EVERYTHING ELSE		`
+    `end				`
+
+    Make camera a subpart of normal PE, but inaccessible through the main system, and visually something different
+    At events.render() add 
+
+    `if first_person() then				`
+    `    NORMAL CAMERA SETUP				`
+    `else						`
+    `    camera:set_pivot(CLIENT POS + camera_vec	`
+    `end						`
+
+    Hijack gumball, set it to pos only -- MAKE SURE TO ROTATE TO CANCEL OUT CLIENT ROTATION
+    End?
+
+25/03/10
+
+to improve the ease of editing the blood textures for more specialized skins, and because of just how the blood textures are designed to work, the "outer layer" of the skin is identical to the main layer, previously, i had to tediously copy and paste parts of the textures to get the outer layer matched, this can be done automatically and the pseudo code is shown below
+
+PESUDO CODE FOR BLOOD TEXTURE GEN
+    function generate_blood_layers(blood_texture) then
+        -- do match texture for 
+
+
+ 
+              body, main arm and leg block,	( 0, 16) (53, 31) c ( 0, 32)
+              head block, 			( 0,  0) (31, 15) c (32,  0)
+              secondary leg block, 		(16, 48) (31, 63) c ( 0, 48)
+              secondary arm block, 		(32, 48) (47, 63) c (48, 48)
+              face to blink, 			( 8,  8) (15, 15) c ( 0,  0)
+              face to secondary, 		( 8,  8) (15, 15) c (24,  0) 
+              face to secondary blink, 		( 8,  8) (15, 15) c (32,  0)
+              chest block			(56, 16) (63, 23) c (56, 24)
+              dress block			( 0,  0) (27, 20) c ( 0, 21)
+
+
+
+
+
+        match_texture_sections(blood_texture, b1 vec2, b2 vec2, c1 vec2, c2 vec2)
+        -- no return, is editing the given texture
+    end
+
+    function match_texture_sections(texture, b1 vec2, b2 vec2, c vec2)
+         -- texture is the texture to modify, it will match to itself
+         -- b1 and b2 are vector 2s corresponding to the base area
+         -- c is the vec 2 to cast the base area to
+         for region_y do -- region_y starts at b1.y, and goes to b2.y
+             for region_x do -- region_x starts at b1.x, and goes to b2.x
+                 GET BASE PIXEL
+                 subtract current x by b1.x and current y by b1.y to zero the location
+                 add c to the zeroed location to get the pixel to cast to
+                 CAST
+             end
+         end
+         -- no return, is editing the given texture
+
+25/03/11
+ g: do the above
+
+ d: above did
+    

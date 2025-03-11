@@ -460,6 +460,30 @@ end
 -- Blood
 blood_setting = 1
 overlay_name = "merged"
+
+function match_texture_sections(texture, b1, b2, c)
+     for y = b1.y, b2.y, 1 do
+         for x = b1.x, b2.x, 1 do
+             local texture_rgba = texture:getPixel(x, y)
+             local mod_x = x - b1.x + c.x
+             local mod_y = y - b1.y + c.y
+             texture:setPixel(mod_x, mod_y, texture_rgba)
+         end
+     end
+end
+
+function generate_second_layer(texture)
+    match_texture_sections(texture, vec( 0, 16), vec(53, 31), vec( 0, 32))
+    -- match_texture_sections(textrue, vec( 0,  0), vec(31, 15), vec(32,  0))
+    match_texture_sections(texture, vec(16, 48), vec(31, 63), vec( 0, 48))
+    match_texture_sections(texture, vec(32, 48), vec(47, 63), vec(48, 48))
+    match_texture_sections(texture, vec( 8,  8), vec(15, 15), vec( 0,  0))
+    match_texture_sections(texture, vec( 8,  8), vec(15, 15), vec(24,  0))
+    match_texture_sections(texture, vec( 8,  8), vec(15, 15), vec(32,  0))
+    match_texture_sections(texture, vec(56, 16), vec(63, 23), vec(56, 24))
+    match_texture_sections(texture, vec( 0,  0), vec(27, 20), vec( 0, 21))
+end
+
 function texture_overlay(base, overlay, not_blank)
     base_size = base:getDimensions()
     local overlay_adjust = textures:copy(overlay_name .. "b", overlay)
@@ -504,7 +528,11 @@ function average(a, b)
 end
 
 -- Generate Blood Textures
-texture_blood_lvl_1 = texture_overlay(textures["skin"], textures["other_textures.blood_lvl_1"], true)
+init_blood_lvl_1 = textures["other_textures.blood_lvl_1"] generate_second_layer(init_blood_lvl_1)
+init_blood_lvl_2 = textures["other_textures.blood_lvl_2"] generate_second_layer(init_blood_lvl_2)
+init_blood_lvl_3 = textures["other_textures.blood_lvl_3"] generate_second_layer(init_blood_lvl_3)
+
+texture_blood_lvl_1 = texture_overlay(textures["skin"], init_blood_lvl_1, true)
 texture_blood_lvl_2 = texture_overlay(textures["skin"], textures["other_textures.blood_lvl_2"], true)
 texture_blood_lvl_3 = texture_overlay(textures["skin"], textures["other_textures.blood_lvl_3"], true)
 
