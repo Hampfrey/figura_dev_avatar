@@ -6,7 +6,6 @@ HOVER = vec(0.96, 0.66, 0.72)
 DRESS = false
 PE_KEYBOARD = 2
 PE_SCALE = 2
-BLOOD_HAIR_BACK = false
 
 -- Hide vanilla player
 vanilla_model.PLAYER:setVisible(false)
@@ -40,11 +39,9 @@ models.model.Cape:setVisible(false)
 models.model.Elytra:setVisible(true)
 
 -- Set Position !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
--- if DRESS then change the arm rotation by 5 degrees
 
 -- Init Variables
 last = nil
-last_state = nil
 armor = false
 
 -- Start action wheel
@@ -316,19 +313,23 @@ function events.tick()
         if world:getTime() == math.floor((world:getTime()) / 20) * 20 then
             pings.syncTimer(math.floor(blink_timer / 20))
         end
-    elseif blink == 2 then -- currently has a bug when it comes to animations that use eyes
+        if player:getPose() == "SLEEPING" then
+            animations.model.blink:setPlaying(true)
+            animations.model.blink:pause()
+        end
+    elseif blink == 2 then
         animations.model.blink_right:setPlaying(false)
         animations.model.blink_left:setPlaying(false)
 
         animations.model.blink:setPlaying(true)
         animations.model.blink:pause()
-    elseif blink == 3 then -- currently has a bug when it comes to animations that use eyes
+    elseif blink == 3 then
         animations.model.blink:setPlaying(false)
         animations.model.blink_left:setPlaying(false)
 
         animations.model.blink_right:setPlaying(true)
         animations.model.blink_right:pause()
-    elseif blink == 4 then -- currently has a bug when it comes to animations that use eyes
+    elseif blink == 4 then
         animations.model.blink:setPlaying(false)
         animations.model.blink_right:setPlaying(false)
 
@@ -481,17 +482,11 @@ function generate_second_layer(texture)
     match_texture_sections(texture, vec( 8,  8), vec(15, 15), vec(24,  0))
     match_texture_sections(texture, vec( 8,  8), vec(15, 15), vec(32,  0))
     match_texture_sections(texture, vec(56, 16), vec(63, 23), vec(56, 24))
-    match_texture_sections(texture, vec( 0,  0), vec(27, 20), vec( 0, 21))
 end
 
 function texture_overlay(base, overlay, not_blank)
     base_size = base:getDimensions()
     local overlay_adjust = textures:copy(overlay_name .. "b", overlay)
-    if not BLOOD_HAIR_BACK and base:getName() == "skin" then -- Need to add dress exceptions
-        overlay_adjust:fill(31, 20, 9, 28, 0, 1, 0, 0)
-        overlay_adjust:fill(16, 20, 1, 28, 0, 1, 0, 0)
-        overlay_adjust:fill(29, 16, 6, 1, 0, 1, 0, 0)
-    end
     local merged = textures:newTexture(overlay_name, 64, 64)
     for y = 0, base_size.y - 1, 1 do
         for x = 0, base_size.x  - 1, 1 do
@@ -1310,10 +1305,10 @@ config_page:newAction()
     end)
 
 config_page:newAction()
-    :title("nothing")
-    --:item("minecraft:ender_pearl")
+    :title("Pose Editor")
+    :texture(textures["other_textures.techinical"], 0, 47, 17, 17)
     :hoverColor(HOVER)
-
+    :onLeftClick(pe_func_activate)
 
 config_page:newAction()
     :title("Cape Enable")
