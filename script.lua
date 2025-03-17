@@ -3,7 +3,7 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72)
 
-DRESS = false
+DRESS = true
 PE_KEYBOARD = 2
 PE_SCALE = 2
 

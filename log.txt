@@ -67,7 +67,7 @@ Other
 - improve blink
 - figure out what to do with that empty config slot
 > more emotes
-> add 4px arm compat
+x add 4px arm compat
 - independent eye control.
 > update f6 help doc
 x camera control
@@ -168,4 +168,7 @@ PESUDO CODE FOR BLOOD TEXTURE GEN
 
  r: sleeping simplified and working
     pe in config menu with a nice icon
-    
+
+25/03/17
+ g: fix emotes for dress
+    other preparations for building the special multi-avatar
