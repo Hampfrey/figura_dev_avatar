@@ -79,7 +79,7 @@ Fixes
 - fix that dress rotation bug
 - fix what happens when blink stacks with animations that use it
 - consider why arrows turned into pe hud assets once
-> secondary face blink
+- secondary face blink
 
 25/03/02
  g: blink and blood config settings
@@ -173,3 +173,7 @@ PESUDO CODE FOR BLOOD TEXTURE GEN
 25/03/17
  g: fix emotes for dress
     other preparations for building the special multi-avatar
+
+ r: dress emotes fixed
+    secondary facial expression working again
+    armor ~maybee~, need to check how it works with modded armor sets

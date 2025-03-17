@@ -3,7 +3,7 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72)
 
-DRESS = true
+DRESS = false
 PE_KEYBOARD = 2
 PE_SCALE = 2
 
@@ -182,10 +182,10 @@ function events.render()
 
         if l and not r then
             --log("Now Anim")
-            pings.helmet_off()
-            pings.chestplate_off()
-            pings.leggings_off()
-            pings.boots_off()
+            --pings.helmet_off()
+            --pings.chestplate_off()
+            --pings.leggings_off()
+            --pings.boots_off()
         end
         if not l and not r then
             --log("Anim Change")
@@ -259,24 +259,14 @@ end
 -- Multi-model Animations
 function multimodel_stop_all()
     animations:stopAll()
-    if sleeping then 
-        animations.model.blink:play()
-        animations.model.blink:pause()
-        --animations.model_emissive.blink:play()
-        --animations.model_emissive.blink:pause()
-    end
 end
 
 function multimodel_play(animation)
     animations.model[animation]:play()
-    --animations.model_emissive[animation]:stop()
-    --log("played " .. tostring(animation))
 end
 
 function multimodel_stop(animation)
     animations.model[animation]:stop()
-    --animations.model_emissive[animation]:stop()
-    --log("stopped " .. tostring(animation))
 end
 
 -- Blink

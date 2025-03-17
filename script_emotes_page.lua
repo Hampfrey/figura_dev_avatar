@@ -16,7 +16,7 @@ end
 function pings.stretch()
     last_animation = "stretch"
     armor_checked = false
-    sleeping = false multimodel_stop_all() check_toggles()
+    multimodel_stop_all() check_toggles()
     multimodel_play("stretch")
 end
 
