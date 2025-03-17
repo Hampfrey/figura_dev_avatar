@@ -74,11 +74,12 @@ x camera control
 > test if armor works
 
 Fixes
-> fix current emotes for dress
+- fix current emotes for dress
 - revert accidental sleeping removal
 - fix that dress rotation bug
 - fix what happens when blink stacks with animations that use it
 - consider why arrows turned into pe hud assets once
+> secondary face blink
 
 25/03/02
  g: blink and blood config settings
