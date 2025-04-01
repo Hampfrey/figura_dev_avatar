@@ -45,206 +45,91 @@ function action_wheel.scroll(direction)
     end
 end
 
+function action_wheel_animation_control(animation_name)
+    last_animation = animation_name
+    if anim_is_active(animations.model[animation_name]) then
+        animations.model[animation_name .. "_end"]:play()
+        animations.model[animation_name]:stop()
+    else
+        animations:stopAll()
+        check_toggles()
+        animations.model[animation_name]:play()
+    end
+end
+
 -- Neutral Page Functions
 function pings.lean_fence()
-    --pings.armor_off()
-    if anim_is_active(animations.model.lean_fence)
-        then multimodel_play("lean_fence_end")
-            multimodel_stop("lean_fence")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("lean_fence")
-            last_animation = "lean_fence"
-    end
+    action_wheel_animation_control("lean_fence")
 end
 
 function pings.lean_forward()
-    last_animation = "lean_forward"
-    --pings.armor_off()
-    if anim_is_active(animations.model.lean_forward)
-        then multimodel_play("lean_forward_end")
-            multimodel_stop("lean_forward")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("lean_forward")
-    end
+    action_wheel_animation_control("lean_forward")
 end
 
 function pings.lean_left()
-    last_animation = "lean_left"
-    --pings.armor_off()
-    if anim_is_active(animations.model.lean_left)
-        then multimodel_play("lean_left_end")
-            multimodel_stop("lean_left")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("lean_left")
-    end
+    action_wheel_animation_control("lean_left")
 end
 
 function pings.lean_right()
-    last_animation = "lean_right"
-    --pings.armor_off()
-    if anim_is_active(animations.model.lean_right)
-        then multimodel_play("lean_right_end")
-            multimodel_stop("lean_right")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("lean_right")
-    end
+    action_wheel_animation_control("lean_right")
 end
 
 function pings.lean_backward()
-    last_animation = "lean_backward"
-    --pings.armor_off()
-    if anim_is_active(animations.model.lean_backward)
-        then multimodel_play("lean_backward_end")
-            multimodel_stop("lean_backward")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("lean_backward")
-    end
+    action_wheel_animation_control("lean_backward")
 end
 
 function pings.sit_slab()
-    last_animation = "sit_slab"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_slab)
-        then multimodel_play("sit_slab_end")
-            multimodel_stop("sit_slab")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_slab")
-    end
+    action_wheel_animation_control("sit_slab")
 end
 
 function pings.sit_block()
-    last_animation = "sit_block"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_block)
-        then multimodel_play("sit_block_end")
-            multimodel_stop("sit_block")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_block")
-    end
+    action_wheel_animation_control("sit_block")
 end
 
 function pings.sit_block_top()
-    last_animation = "sit_block_top"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_block_top)
-        then sleeping = false multimodel_stop_all() check_toggles()
-            multimodel_play("sit_block_top_end")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_block_top")
-    end
+    action_wheel_animation_control("sit_block_top")
 end
 
 function pings.sit_wall()
-    last_animation = "sit_wall"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_wall)
-        then multimodel_play("sit_wall_end")
-            multimodel_stop("sit_wall")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_wall")
-    end
+    action_wheel_animation_control("sit_wall")
 end
 
 function pings.sit_floor()
-    last_animation = "sit_floor"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_floor)
-        then multimodel_play("sit_floor_end")
-            multimodel_stop("sit_floor")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_floor")
-    end
+    action_wheel_animation_control("sit_floor")
 end
 
 function pings.sleep()
-    last_animation = "sleep"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sleep)
-        then multimodel_play("sleep_end")
-            multimodel_stop("sleep")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sleep")
-    end
+    action_wheel_animation_control("sleep")
 end
 
 function pings.handstand()
-    last_animation = "handstand"
-    --pings.armor_off()
-    if anim_is_active(animations.model.handstand)
-        then multimodel_play("handstand_end")
-            multimodel_stop("handstand")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("handstand")
-    end
+    action_wheel_animation_control("handstand")
 end
 
 -- Confident Page Functions
 function pings.lean_backward_arms_up()
-    last_animation = "lean_backward_arms_up"
-    --pings.armor_off()
-    if anim_is_active(animations.model.lean_backward_arms_up)
-        then multimodel_play("lean_backward_arms_up_end")
-            multimodel_stop("lean_backward_arms_up")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("lean_backward_arms_up")
-    end
+    action_wheel_animation_control("lean_backward_arms_up")
 end
 
 function pings.sit_slab_sprawl()
-    last_animation = "sit_slab_sprawl"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_slab_sprawl)
-        then multimodel_play("sit_slab_sprawl_end")
-            multimodel_stop("sit_slab_sprawl")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_slab_sprawl")
-    end
+    action_wheel_animation_control("sit_slab_sprawl")
 end
 
 function pings.sit_stairs()
-    last_animation = "sit_stairs"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_stairs)
-        then multimodel_play("sit_stairs_end")
-            multimodel_stop("sit_stairs")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_stairs")
-    end
+    action_wheel_animation_control("sit_stairs")
 end
 
 -- Shy Page Functions
 function pings.sit_slab_shy()
-    last_animation = "sit_slab_shy"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_slab_shy)
-        then multimodel_play("sit_slab_shy_end")
-            multimodel_stop("sit_slab_shy")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_slab_shy")
-    end
+    action_wheel_animation_control("sit_slab_shy")
 end
 
-
 function pings.sit_wall_shy()
-    last_animation = "sit_wall_shy"
-    --pings.armor_off()
-    if anim_is_active(animations.model.sit_wall_shy)
-        then multimodel_play("sit_wall_shy_end")
-            multimodel_stop("sit_wall_shy")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("sit_wall_shy")
-    end
+    action_wheel_animation_control("sit_wall_shy")
 end
 
 function pings.curl()
-    last_animation = "curl"
-    --pings.armor_off()
-    if anim_is_active(animations.model.curl)
-        then sleeping = false multimodel_stop_all() check_toggles()
-            multimodel_play("curl_end")
-        else multimodel_stop_all() check_toggles()
-            multimodel_play("curl")
-    end
+    action_wheel_animation_control("curl")
 end
 
 -- Neutral Page Actions

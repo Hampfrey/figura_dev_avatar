@@ -190,8 +190,8 @@ Other
 > update f6 help doc
 
 For FPV and more
-> eating and drinking animation for arm movement
-> boat arm adjust
+/ eating and drinking animation for arm movement
+x boat arm adjust
 > see minecart
 > see horse, llama, etc
 
@@ -205,3 +205,20 @@ For FPV and more
  g: doing that plane thing
 
  r: eating and drinking now move the arm as a visual
+    removed legacy functions, no more multimodel
+    also *greatly* cleaned up script_poses_page
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

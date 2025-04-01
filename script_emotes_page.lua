@@ -8,16 +8,14 @@ HOVER = vec(0.96, 0.66, 0.72)
 -- Functions
 function pings.wave()
     last_animation = "wave"
-    armor_checked = false
-    multimodel_stop_all() check_toggles()
-    multimodel_play("wave")
+    animations:stopAll() check_toggles()
+    animations.model["wave"]:play()
 end
 
 function pings.stretch()
     last_animation = "stretch"
-    armor_checked = false
-    multimodel_stop_all() check_toggles()
-    multimodel_play("stretch")
+    animations:stopAll() check_toggles()
+    animations.model["stretch"]:play()
 end
 
 -- Define the Actions within the Page

@@ -113,7 +113,7 @@ function pings.armor_off()
 end
 
 function pings.helmet_on()
-    if not pe_active then multimodel_stop_all() end
+    if not pe_active then animations:stopAll() end
     vanilla_model.HELMET:setVisible(true)
 end
 
@@ -122,7 +122,7 @@ function pings.helmet_off()
 end
 
 function pings.chestplate_on()
-    if not pe_active then multimodel_stop_all() end
+    if not pe_active then animations:stopAll() end
     vanilla_model.CHESTPLATE:setVisible(true)
     pings.breast_off()
 end
@@ -133,7 +133,7 @@ function pings.chestplate_off()
 end
 
 function pings.leggings_on()
-    if not pe_active then multimodel_stop_all() end
+    if not pe_active then animations:stopAll() end
     vanilla_model.LEGGINGS:setVisible(true)
 end
 
@@ -142,7 +142,7 @@ function pings.leggings_off()
 end
 
 function pings.boots_on()
-    if not pe_active then multimodel_stop_all() end
+    if not pe_active then animations:stopAll() end
     vanilla_model.BOOTS:setVisible(true)
 end
 
@@ -307,19 +307,6 @@ function events.tick()
     end
 end
 
--- Multi-model Animations
-function multimodel_stop_all()
-    animations:stopAll()
-end
-
-function multimodel_play(animation)
-    animations.model[animation]:play()
-end
-
-function multimodel_stop(animation)
-    animations.model[animation]:stop()
-end
-
 -- Blink
 blink = 1
 blink_timer = 0
@@ -332,10 +319,6 @@ animations.model.blink:setPriority(-1)
 
 function pings.blink() 
     animations.model.blink:play()
-end
-
-function affecting_eyes() -- wildly lazy but i cannot figure out the logic here
-    return anim_is_active(animations.model.sleep) or anim_is_active(animations.model.sleep_end) or anim_is_active(animations.model.curl_end) or anim_is_active(animations.model.stretch)
 end
 
 -- Code for blink
