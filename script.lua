@@ -7,6 +7,15 @@ DRESS = false
 PE_KEYBOARD = 2
 PE_SCALE = 2
 
+TECHNICAL_ANIMATIONS = {animations.model.dress_move, 
+                        animations.model.dress_sit, 
+                        animations.model.dress_crouch, 
+                        animations.model.blink_left, 
+                        animations.model.blink_right, 
+                        animations.model.blink, 
+                        animations.model.consume, 
+                        animations.model.consume_offhand}
+
 -- Hide vanilla player
 vanilla_model.PLAYER:setVisible(false)
 vanilla_model.ARMOR:setVisible(false)
@@ -43,6 +52,7 @@ models.model.Elytra:setVisible(true)
 -- Init Variables
 last = nil
 armor = false
+
 
 -- Start action wheel
 main_page = action_wheel:newPage()
@@ -150,6 +160,30 @@ function pings.pivots_off()
     models.model.root.RightArm.RightItemPivot:setVisible(false)
 end
 
+function pings.armor_pivots_on()
+    models.model.root.Head.HelmetPivot:setVisible(true)
+    models.model.root.Body.ChestplatePivot:setVisible(true)
+    models.model.root.Body.LeggingsPivot:setVisible(true)
+    models.model.root.LeftArm.LeftShoulderPivot:setVisible(true)
+    models.model.root.RightArm.RightShoulderPivot:setVisible(true)
+    models.model.root.LeftLeg.LeftLeggingPivot:setVisible(true)
+    models.model.root.LeftLeg.LeftBootPivot:setVisible(true)
+    models.model.root.RightLeg.RightLeggingPivot:setVisible(true)
+    models.model.root.RightLeg.RightBootPivot:setVisible(true)
+end
+
+function pings.armor_pivots_off()
+    models.model.root.Head.HelmetPivot:setVisible(false)
+    models.model.root.Body.ChestplatePivot:setVisible(false)
+    models.model.root.Body.LeggingsPivot:setVisible(false)
+    models.model.root.LeftArm.LeftShoulderPivot:setVisible(false)
+    models.model.root.RightArm.RightShoulderPivot:setVisible(false)
+    models.model.root.LeftLeg.LeftLeggingPivot:setVisible(false)
+    models.model.root.LeftLeg.LeftBootPivot:setVisible(false)
+    models.model.root.RightLeg.RightLeggingPivot:setVisible(false)
+    models.model.root.RightLeg.RightBootPivot:setVisible(false)
+end
+
 -- Display Text
 display_text = models:newPart("display_textGui", "GUI"):newText("ActionWheelPageName")
 function events.render()
@@ -161,19 +195,19 @@ end
 display_text:setText("")
 
 -- Camera
-function events.render()
+function events.render(_, context)
+    -- Hide Head in FPV for first person mod
+    models.model.root.Head:setVisible(not (renderer:isFirstPerson() and context == "OTHER"))
+    
     -- Animation Change Controls
     local playing = animations:getPlaying(true)
-    --logTable((playing))
+    
+    for i = #TECHNICAL_ANIMATIONS, 1, -1 do
+        playing = remove_val_from(playing, TECHNICAL_ANIMATIONS[i])
+    end
+    logTable(playing)
 
-    playing = remove_val_from(playing, animations.model.dress_move)
-    playing = remove_val_from(playing, animations.model.dress_sit)
-    playing = remove_val_from(playing, animations.model.dress_crouch)
-    playing = remove_val_from(playing, animations.model.blink_left)
-    playing = remove_val_from(playing, animations.model.blink_right)
-    local playing_no_blink = remove_val_from(playing, animations.model.blink)
-
-    local recent = playing_no_blink[1]
+    local recent = playing[1]
     if last ~= recent then
         --log("Change")
         local l = last == nil
@@ -182,10 +216,12 @@ function events.render()
 
         if l and not r then
             --log("Now Anim")
-            --pings.helmet_off()
-            --pings.chestplate_off()
-            --pings.leggings_off()
-            --pings.boots_off()
+            if not models.model.root.Head.HelmetPivot:getVisible() then
+                pings.helmet_off()
+                pings.chestplate_off()
+                pings.leggings_off()
+                pings.boots_off()
+            end
         end
         if not l and not r then
             --log("Anim Change")
@@ -199,7 +235,7 @@ function events.render()
     
     -- Hand Settings
     local render_hands = true
-    if #playing_no_blink > 0 then
+    if #playing > 0 then
         render_hands = false
     end
 
@@ -214,7 +250,7 @@ function events.render()
 
     -- Link with Animations
     local rot = player:getRot()
-    if renderer:isFirstPerson() and player:getPose() ~= "SLEEPING" and player:getPose() ~= "FALL_FLYING" and #playing_no_blink > 0 then
+    if renderer:isFirstPerson() and player:getPose() ~= "SLEEPING" and player:getPose() ~= "FALL_FLYING" and #playing > 0 then
         local look = models.model.root.Head:getAnimRot()
         local anim_pos = models.model.root.Head:getAnimPos()
         local anim_rot = models.model.root.Head:getAnimRot()
@@ -232,8 +268,9 @@ function events.render()
     end 
 end
 
--- Dress Movement
+-- Special animation (dress movement and world interactions)
 function events.tick()
+    -- Dress Movement
     if DRESS then
         local crouching = player:getPose() == "CROUCHING"
         local moving = player:getVelocity().xz:length() > .01
@@ -253,6 +290,20 @@ function events.tick()
         animations.model.dress_move:setPlaying(moving and not sitting)
         animations.model.dress_move:setSpeed(player:getVelocity().xz:length() * 5)
         if not sitting and not pe_active then models.model.root.Dress:setOffsetRot(player:getVelocity().xz:length() * -30 * direction, 0, 0) end
+    end
+
+    -- Using
+    if player:getActiveItem():getUseAction() == "EAT" or player:getActiveItem():getUseAction() == "DRINK" then
+        if player:getActiveItem().id == player:getHeldItem().id then
+            animations.model.consume:setPlaying(true)
+            animations.model.consume_offhand:setPlaying(false)
+        else
+            animations.model.consume_offhand:setPlaying(true)
+            animations.model.consume:setPlaying(false)
+        end
+    else
+        animations.model.consume:setPlaying(false)
+        animations.model.consume_offhand:setPlaying(false)
     end
 end
 
@@ -393,6 +444,7 @@ function animation_end()
         -- Other
         if anim_is_active(animations.model.curl) then pings.curl() end
         if anim_is_active(animations.model.handstand) then pings.handstand() end
+        if anim_is_active(animations.model.sleep) then pings.sleep() end
 
         -- Sits
         if anim_is_active(animations.model.sit_floor) then pings.sit_floor() end
@@ -1433,8 +1485,8 @@ config_page_2:newAction(4)
     end)
 
 config_page_2:newAction(7)
-    :title("Pivots Off")
-    :toggleTitle("Pivots On")
+    :title("Pivots On")
+    :toggleTitle("Pivots Off")
     :item("minecraft:iron_sword")
     :hoverColor(HOVER)
     :toggleColor(RED)
@@ -1445,6 +1497,21 @@ config_page_2:newAction(7)
     :onUntoggle(function() 
         pivots = false
         pings.pivots_on()
+    end)
+
+config_page_2:newAction(6)
+    :title("Mod Compat Off")
+    :toggleTitle("Mod Compat On")
+    :item("minecraft:iron_ingot")
+    :hoverColor(HOVER)
+    :toggleColor(GREEN)
+    :onToggle(function() 
+        armor_pivots = true
+        pings.armor_pivots_off()
+    end)
+    :onUntoggle(function() 
+        armor_pivots = true
+        pings.armor_pivots_on()
     end)
 
 config_page_2:newAction(8)

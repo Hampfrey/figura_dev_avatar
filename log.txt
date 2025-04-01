@@ -50,7 +50,7 @@ ENTRIES
 
 25/03
 
-FUTURE GOALS AS DETERMINED IN THE SHOWER
+FUTURE GOALS AS DETERMINED IN THE SHOWER (for march)
 
 Config
 - restructure generally -- one empty slot
@@ -177,3 +177,31 @@ PESUDO CODE FOR BLOOD TEXTURE GEN
  r: dress emotes fixed
     secondary facial expression working again
     armor ~maybee~, need to check how it works with modded armor sets
+
+25/04
+
+FUTURE GOALS AS DETERMINED ON THE AREOPLANE
+
+PE
+> specialized avatar for screenshots, removing certain features and allowing for multiple avatars to be posed at once
+
+Other
+> more emotes
+> update f6 help doc
+
+For FPV and more
+> eating and drinking animation for arm movement
+> boat arm adjust
+> see minecart
+> see horse, llama, etc
+
+25/03/30
+ g: on a plane rn, no internet, so no docs, going to try to add eating and drinking animations
+    that has been quickly halted because i do not know the command for getting the player state
+    attempting the boat thing
+    giving up lol
+
+25/04/01
+ g: doing that plane thing
+
+ r: eating and drinking now move the arm as a visual
