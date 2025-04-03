@@ -189,6 +189,11 @@ Other
 > more emotes
 > update f6 help doc
 
+Armor
+> model part logic
+> armor on model parts
+> 
+
 For FPV and more
 / eating and drinking animation for arm movement
 x boat arm adjust
@@ -207,6 +212,12 @@ x boat arm adjust
  r: eating and drinking now move the arm as a visual
     removed legacy functions, no more multimodel
     also *greatly* cleaned up script_poses_page
+
+25/04/03
+ g: improve armor logic, figure out a way to make custom sections of armor
+
+ r: honestly not much, restructured a few things, spent a while fixing one of those "my code only works on tuesdays" bugs
+
 
 
 

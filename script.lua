@@ -53,7 +53,6 @@ models.model.Elytra:setVisible(true)
 last = nil
 armor = false
 
-
 -- Start action wheel
 main_page = action_wheel:newPage()
 pe_page = action_wheel:newPage()
@@ -82,6 +81,42 @@ local function split(str, delimiter) -- Courtesy of u/luascriptdev
 end
 
 -- Armor
+function events.tick()
+    local playing = animations:getPlaying(true)
+    
+    for i = #TECHNICAL_ANIMATIONS, 1, -1 do
+        playing = remove_val_from(playing, TECHNICAL_ANIMATIONS[i])
+    end
+
+    local recent = playing[1]
+    if last ~= recent then
+        --log("Change")
+        local l = last == nil
+        local r = recent == nil
+        --log(l, r)
+
+        if l and not r then
+            --log("Now Anim")
+            if not models.model.root.Head.HelmetPivot:getVisible() then
+                pings.helmet_off()
+                pings.chestplate_off()
+                pings.leggings_off()
+                pings.boots_off()
+            end
+        end
+        if not l and not r then
+            --log("Anim Change")
+        end
+        if not l and r then
+            --log("End Anim")
+            check_armor()
+        end
+    end
+    last = recent
+
+    models.model.root.Body.Breast:setVisible(not (player:getItem(5).id ~= "minecraft:air" and vanilla_model.CHESTPLATE:getVisible()))
+end
+
 function check_armor()
     if helmet then
         pings.helmet_on()
@@ -124,12 +159,10 @@ end
 function pings.chestplate_on()
     if not pe_active then animations:stopAll() end
     vanilla_model.CHESTPLATE:setVisible(true)
-    pings.breast_off()
 end
 
 function pings.chestplate_off()
     vanilla_model.CHESTPLATE:setVisible(false)
-    pings.breast_on()
 end
 
 function pings.leggings_on()
@@ -150,38 +183,21 @@ function pings.boots_off()
     vanilla_model.BOOTS:setVisible(false)
 end
 
-function pings.pivots_on()
-    models.model.root.LeftArm.LeftItemPivot:setVisible(true)
-    models.model.root.RightArm.RightItemPivot:setVisible(true)
+function pings.pivots_toggle(setting)
+    models.model.root.LeftArm.LeftItemPivot:setVisible(setting)
+    models.model.root.RightArm.RightItemPivot:setVisible(setting)
 end
 
-function pings.pivots_off()
-    models.model.root.LeftArm.LeftItemPivot:setVisible(false)
-    models.model.root.RightArm.RightItemPivot:setVisible(false)
-end
-
-function pings.armor_pivots_on()
-    models.model.root.Head.HelmetPivot:setVisible(true)
-    models.model.root.Body.ChestplatePivot:setVisible(true)
-    models.model.root.Body.LeggingsPivot:setVisible(true)
-    models.model.root.LeftArm.LeftShoulderPivot:setVisible(true)
-    models.model.root.RightArm.RightShoulderPivot:setVisible(true)
-    models.model.root.LeftLeg.LeftLeggingPivot:setVisible(true)
-    models.model.root.LeftLeg.LeftBootPivot:setVisible(true)
-    models.model.root.RightLeg.RightLeggingPivot:setVisible(true)
-    models.model.root.RightLeg.RightBootPivot:setVisible(true)
-end
-
-function pings.armor_pivots_off()
-    models.model.root.Head.HelmetPivot:setVisible(false)
-    models.model.root.Body.ChestplatePivot:setVisible(false)
-    models.model.root.Body.LeggingsPivot:setVisible(false)
-    models.model.root.LeftArm.LeftShoulderPivot:setVisible(false)
-    models.model.root.RightArm.RightShoulderPivot:setVisible(false)
-    models.model.root.LeftLeg.LeftLeggingPivot:setVisible(false)
-    models.model.root.LeftLeg.LeftBootPivot:setVisible(false)
-    models.model.root.RightLeg.RightLeggingPivot:setVisible(false)
-    models.model.root.RightLeg.RightBootPivot:setVisible(false)
+function pings.armor_pivots_toggle(setting)
+    models.model.root.Head.HelmetPivot:setVisible(setting)
+    models.model.root.Body.ChestplatePivot:setVisible(setting)
+    models.model.root.Body.LeggingsPivot:setVisible(setting)
+    models.model.root.LeftArm.LeftShoulderPivot:setVisible(setting)
+    models.model.root.RightArm.RightShoulderPivot:setVisible(setting)
+    models.model.root.LeftLeg.LeftLeggingPivot:setVisible(setting)
+    models.model.root.LeftLeg.LeftBootPivot:setVisible(setting)
+    models.model.root.RightLeg.RightLeggingPivot:setVisible(setting)
+    models.model.root.RightLeg.RightBootPivot:setVisible(setting)
 end
 
 -- Display Text
@@ -205,33 +221,6 @@ function events.render(_, context)
     for i = #TECHNICAL_ANIMATIONS, 1, -1 do
         playing = remove_val_from(playing, TECHNICAL_ANIMATIONS[i])
     end
-    logTable(playing)
-
-    local recent = playing[1]
-    if last ~= recent then
-        --log("Change")
-        local l = last == nil
-        local r = recent == nil
-        --log(l, r)
-
-        if l and not r then
-            --log("Now Anim")
-            if not models.model.root.Head.HelmetPivot:getVisible() then
-                pings.helmet_off()
-                pings.chestplate_off()
-                pings.leggings_off()
-                pings.boots_off()
-            end
-        end
-        if not l and not r then
-            --log("Anim Change")
-        end
-        if not l and r then
-            --log("End Anim")
-            check_armor()
-        end
-    end
-    last = recent
     
     -- Hand Settings
     local render_hands = true
@@ -1205,13 +1194,6 @@ action = pe_page_2:newAction()
     end)
 
 -- Action Functions
-function pings.breast_on()
-    models.model.root.Body.Breast:setVisible(true)
-end
-
-function pings.breast_off()
-    models.model.root.Body.Breast:setVisible(false)
-end
 
 function pings.cape_on()
     models.model.Cape:setVisible(true)
@@ -1467,21 +1449,6 @@ config_page_2:newAction(4)
         pings.boots_off()
     end)
 
-config_page_2:newAction(7)
-    :title("Pivots On")
-    :toggleTitle("Pivots Off")
-    :item("minecraft:iron_sword")
-    :hoverColor(HOVER)
-    :toggleColor(RED)
-    :onToggle(function() 
-        pivots = true
-        pings.pivots_off()
-    end)
-    :onUntoggle(function() 
-        pivots = false
-        pings.pivots_on()
-    end)
-
 config_page_2:newAction(6)
     :title("Mod Compat Off")
     :toggleTitle("Mod Compat On")
@@ -1489,12 +1456,23 @@ config_page_2:newAction(6)
     :hoverColor(HOVER)
     :toggleColor(GREEN)
     :onToggle(function() 
-        armor_pivots = true
-        pings.armor_pivots_off()
+        pings.armor_pivots_toggle(false)
     end)
     :onUntoggle(function() 
-        armor_pivots = true
-        pings.armor_pivots_on()
+        pings.armor_pivots_toggle(true)
+    end)
+
+config_page_2:newAction(7)
+    :title("Pivots On")
+    :toggleTitle("Pivots Off")
+    :item("minecraft:iron_sword")
+    :hoverColor(HOVER)
+    :toggleColor(RED)
+    :onToggle(function() 
+        pings.pivots_toggle(false)
+    end)
+    :onUntoggle(function() 
+        pings.pivots_toggle(true)
     end)
 
 config_page_2:newAction(8)
