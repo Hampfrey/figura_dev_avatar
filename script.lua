@@ -45,6 +45,8 @@ models.model.root.Dress:setVisible(DRESS)
 models.model.root.LeftLeg:setVisible(not DRESS)
 models.model.root.RightLeg:setVisible(not DRESS)
 
+models.model.root.Body.Breast.BreastArmor:setVisible(false)
+
 models.model.Cape:setVisible(false)
 models.model.Elytra:setVisible(true)
 
@@ -52,7 +54,7 @@ models.model.Elytra:setVisible(true)
 
 -- Init Variables
 last = nil
-armor = false
+modelpart_armor = true
 
 -- Start action wheel
 main_page = action_wheel:newPage()
@@ -61,6 +63,17 @@ pe_page_2 = action_wheel:newPage()
 config_page = action_wheel:newPage()
 config_page_2 = action_wheel:newPage()
 action_wheel:setPage(main_page)
+
+-- KattArmor
+local kattArmor = require("KattArmor")()
+
+kattArmor.Armor.Chestplate
+    :addParts(
+        models.model.root.Body.Breast.BreastArmor.BreastArmor
+    )
+    :addTrimParts(
+        models.model.root.Body.Breast.BreastArmor.BreastTrim
+    )
 
 -- Universal Functions
 function remove_val_from(input_table, val)
@@ -115,7 +128,14 @@ function events.tick()
     end
     last = recent
 
-    models.model.root.Body.Breast:setVisible(not (player:getItem(5).id ~= "minecraft:air" and vanilla_model.CHESTPLATE:getVisible()))
+    models.model.root.Body.Breast.BreastArmor:setVisible(
+        models.model.root.Head.HelmetPivot:getVisible() and 
+        vanilla_model.CHESTPLATE:getVisible())
+
+    models.model.root.Body.Breast:setVisible(not(
+        player:getItem(5).id ~= "minecraft:air" and 
+        vanilla_model.CHESTPLATE:getVisible() and 
+        models.model.root.Head.HelmetPivot:getVisible() == false))
 end
 
 function check_armor()
@@ -159,10 +179,12 @@ end
 
 function pings.chestplate_on()
     if not pe_active and not models.model.root.Head.HelmetPivot:getVisible() then animations:stopAll() end
-    vanilla_model.CHESTPLATE:setVisible(true)
+    models.model.root.Body.Breast.BreastArmor:setVisible(models.model.root.Body.ChestplatePivot:getVisible())
+    vanilla_model.CHESTPLATE:setVisible(true) 
 end
 
 function pings.chestplate_off()
+    models.model.root.Body.Breast.BreastArmor:setVisible(false)
     vanilla_model.CHESTPLATE:setVisible(false)
 end
 
@@ -190,6 +212,9 @@ function pings.pivots_toggle(setting)
 end
 
 function pings.armor_pivots_toggle(setting)
+    if setting == false then
+        models.model.root.Body.Breast.BreastArmor:setVisible(false)
+    end
     models.model.root.Head.HelmetPivot:setVisible(setting)
     models.model.root.Body.ChestplatePivot:setVisible(setting)
     models.model.root.Body.LeggingsPivot:setVisible(setting)
@@ -1422,19 +1447,6 @@ config_page_2:newAction(4)
     :onUntoggle(function() 
         boots = false
         pings.boots_off()
-    end)
-
-config_page_2:newAction(6)
-    :title("Modelpart Armor On")
-    :toggleTitle("Modelpart Armor Off")
-    :item("minecraft:iron_nugget")
-    :hoverColor(HOVER)
-    :toggleColor(RED)
-    :onToggle(function() 
-        pings.modelpart_armor_toggle(false)
-    end)
-    :onUntoggle(function() 
-        pings.modelpart_armor_toggle(true)
     end)
 
 config_page_2:newAction(6)
