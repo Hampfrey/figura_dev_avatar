@@ -222,7 +222,9 @@ x see horse, llama, etc
  g: fix at least that one bug with toggling armor during animations
     try to add modelpart armor, experimenting with a community script called KattArmor
 
+ r: KattArmor added for breast
 
+ l: add KattArmor for dress?
 
 
 
