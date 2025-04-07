@@ -195,10 +195,10 @@ Armor
 > 
 
 For FPV and more
-/ eating and drinking animation for arm movement
+- eating and drinking animation for arm movement
 x boat arm adjust
-> see minecart
-> see horse, llama, etc
+x see minecart
+x see horse, llama, etc
 
 25/03/30
  g: on a plane rn, no internet, so no docs, going to try to add eating and drinking animations
@@ -217,6 +217,10 @@ x boat arm adjust
  g: improve armor logic, figure out a way to make custom sections of armor
 
  r: honestly not much, restructured a few things, spent a while fixing one of those "my code only works on tuesdays" bugs
+
+25/04/07
+ g: fix at least that one bug with toggling armor during animations
+    try to add modelpart armor, experimenting with a community script called KattArmor
 
 
 

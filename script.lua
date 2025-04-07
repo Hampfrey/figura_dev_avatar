@@ -14,7 +14,8 @@ TECHNICAL_ANIMATIONS = {animations.model.dress_move,
                         animations.model.blink_right, 
                         animations.model.blink, 
                         animations.model.consume, 
-                        animations.model.consume_offhand}
+                        animations.model.consume_offhand,
+                        animations.model.freeze}
 
 -- Hide vanilla player
 vanilla_model.PLAYER:setVisible(false)
@@ -148,7 +149,7 @@ function pings.armor_off()
 end
 
 function pings.helmet_on()
-    if not pe_active then animations:stopAll() end
+    if not pe_active and not models.model.root.Head.HelmetPivot:getVisible() then animations:stopAll() end
     vanilla_model.HELMET:setVisible(true)
 end
 
@@ -157,7 +158,7 @@ function pings.helmet_off()
 end
 
 function pings.chestplate_on()
-    if not pe_active then animations:stopAll() end
+    if not pe_active and not models.model.root.Head.HelmetPivot:getVisible() then animations:stopAll() end
     vanilla_model.CHESTPLATE:setVisible(true)
 end
 
@@ -166,7 +167,7 @@ function pings.chestplate_off()
 end
 
 function pings.leggings_on()
-    if not pe_active then animations:stopAll() end
+    if not pe_active and not models.model.root.Head.HelmetPivot:getVisible() then animations:stopAll() end
     vanilla_model.LEGGINGS:setVisible(true)
 end
 
@@ -175,7 +176,7 @@ function pings.leggings_off()
 end
 
 function pings.boots_on()
-    if not pe_active then animations:stopAll() end
+    if not pe_active and not models.model.root.Head.HelmetPivot:getVisible() then animations:stopAll() end
     vanilla_model.BOOTS:setVisible(true)
 end
 
@@ -1194,23 +1195,13 @@ action = pe_page_2:newAction()
     end)
 
 -- Action Functions
-
-function pings.cape_on()
-    models.model.Cape:setVisible(true)
+function pings.cape_toggle(setting)
+    models.model.Cape:setVisible(setting)
 end
 
-function pings.cape_off()
-    models.model.Cape:setVisible(false)
-end
-
-function pings.blush_on()
-    models.model.root.Head.MainExpression:setVisible(false) 
-    models.model.root.Head.SecondaryExpression:setVisible(true)
-end
-
-function pings.blush_off()
-    models.model.root.Head.MainExpression:setVisible(true) 
-    models.model.root.Head.SecondaryExpression:setVisible(false)
+function pings.blush_toggle()
+    models.model.root.Head.MainExpression:setVisible(not setting) 
+    models.model.root.Head.SecondaryExpression:setVisible(setting)
 end
 
 function check_toggles()
@@ -1266,22 +1257,6 @@ local action = main_page:newAction()
     :hoverColor(HOVER)
     :onLeftClick(play_last_animation)
 
---[[ Config Scroll
-config_position = 1
-function action_wheel.scroll(direction)
-    if config_page == action_wheel:getCurrentPage() or config_page_2 == action_wheel:getCurrentPage() then
-            config_position = config_position - direction
-            if config_position < 1 then
-                config_position = 2
-            elseif config_position > 2 then
-                config_position = 1
-            end
-
-            if config_position == 1 then action_wheel:setPage(config_page) display_text:setText("Config 1/2") end
-            if config_position == 2 then action_wheel:setPage(config_page_2) display_text:setText("Config 2/2") end
-    end
-end --]]
-
 -- Config
 config_page:newAction()
     :title("Blush Enable")
@@ -1289,8 +1264,8 @@ config_page:newAction()
     :item("minecraft:pink_dye")
     :hoverColor(HOVER)
     :toggleColor(GREEN)
-    :onToggle(pings.blush_on)
-    :onUntoggle(pings.blush_off)
+    :onToggle(function() pings.blush_toggle(true) end)
+    :onUntoggle(function() pings.blush_toggle(false) end)
 
 config_page:newAction()
     :title("Blink Auto")
@@ -1323,8 +1298,8 @@ config_page:newAction()
     :item("minecraft:yellow_carpet")
     :hoverColor(HOVER)
     :toggleColor(GREEN)
-    :onToggle(pings.cape_on)
-    :onUntoggle(pings.cape_off)
+    :onToggle(function() pings.cape_toggle(true) end)
+    :onUntoggle(function() pings.cape_toggle(false) end)
 
 config_page:newAction()
     :title("Blood Auto")
@@ -1447,6 +1422,19 @@ config_page_2:newAction(4)
     :onUntoggle(function() 
         boots = false
         pings.boots_off()
+    end)
+
+config_page_2:newAction(6)
+    :title("Modelpart Armor On")
+    :toggleTitle("Modelpart Armor Off")
+    :item("minecraft:iron_nugget")
+    :hoverColor(HOVER)
+    :toggleColor(RED)
+    :onToggle(function() 
+        pings.modelpart_armor_toggle(false)
+    end)
+    :onUntoggle(function() 
+        pings.modelpart_armor_toggle(true)
     end)
 
 config_page_2:newAction(6)
