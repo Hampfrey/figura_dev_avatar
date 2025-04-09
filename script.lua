@@ -52,10 +52,6 @@ models.model.Elytra:setVisible(true)
 
 -- Set Position !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
--- Init Variables
-last = nil
-modelpart_armor = true
-
 -- Start action wheel
 main_page = action_wheel:newPage()
 pe_page = action_wheel:newPage()
@@ -95,6 +91,9 @@ local function split(str, delimiter) -- Courtesy of u/luascriptdev
 end
 
 -- Armor
+last = nil
+armor = 1
+
 function events.tick()
     local playing = animations:getPlaying(true)
     
@@ -111,7 +110,7 @@ function events.tick()
 
         if l and not r then
             --log("Now Anim")
-            if not models.model.root.Head.HelmetPivot:getVisible() then
+            if armor == 3 or armor == 4 then
                 pings.helmet_off()
                 pings.chestplate_off()
                 pings.leggings_off()
@@ -128,14 +127,21 @@ function events.tick()
     end
     last = recent
 
-    models.model.root.Body.Breast.BreastArmor:setVisible(
-        models.model.root.Head.HelmetPivot:getVisible() and 
-        vanilla_model.CHESTPLATE:getVisible())
+    models.model.root.Body.Breast.BreastArmor:setVisible(armor == 1 and vanilla_model.CHESTPLATE:getVisible())
 
-    models.model.root.Body.Breast:setVisible(not(
-        player:getItem(5).id ~= "minecraft:air" and 
-        vanilla_model.CHESTPLATE:getVisible() and 
-        models.model.root.Head.HelmetPivot:getVisible() == false))
+    if player:getItem(5).id == "minecraft:air" or player:getItem(5).id == "minecraft:elytra" then
+        models.model.root.Body.Breast:setVisible(true)
+    else
+        if vanilla_model.CHESTPLATE:getVisible() then
+            if armor == 1 or armor == 4 then
+                models.model.root.Body.Breast:setVisible(true)
+            else
+                models.model.root.Body.Breast:setVisible(false)
+            end
+        else
+            models.model.root.Body.Breast:setVisible(true)
+        end
+    end
 end
 
 function check_armor()
@@ -211,19 +217,24 @@ function pings.pivots_toggle(setting)
     models.model.root.RightArm.RightItemPivot:setVisible(setting)
 end
 
-function pings.armor_pivots_toggle(setting)
-    if setting == false then
+function pings.armor_set(armor_setting)
+    armor = armor_setting
+    local figura_parts = false
+    if armor_setting == 1 or armor_setting == 2 then
+        figura_parts = true
+    end
+    if figura_parts == false then
         models.model.root.Body.Breast.BreastArmor:setVisible(false)
     end
-    models.model.root.Head.HelmetPivot:setVisible(setting)
-    models.model.root.Body.ChestplatePivot:setVisible(setting)
-    models.model.root.Body.LeggingsPivot:setVisible(setting)
-    models.model.root.LeftArm.LeftShoulderPivot:setVisible(setting)
-    models.model.root.RightArm.RightShoulderPivot:setVisible(setting)
-    models.model.root.LeftLeg.LeftLeggingPivot:setVisible(setting)
-    models.model.root.LeftLeg.LeftBootPivot:setVisible(setting)
-    models.model.root.RightLeg.RightLeggingPivot:setVisible(setting)
-    models.model.root.RightLeg.RightBootPivot:setVisible(setting)
+    models.model.root.Head.HelmetPivot:setVisible(figura_parts)
+    models.model.root.Body.ChestplatePivot:setVisible(figura_parts)
+    models.model.root.Body.LeggingsPivot:setVisible(figura_parts)
+    models.model.root.LeftArm.LeftShoulderPivot:setVisible(figura_parts)
+    models.model.root.RightArm.RightShoulderPivot:setVisible(figura_parts)
+    models.model.root.LeftLeg.LeftLeggingPivot:setVisible(figura_parts)
+    models.model.root.LeftLeg.LeftBootPivot:setVisible(figura_parts)
+    models.model.root.RightLeg.RightLeggingPivot:setVisible(figura_parts)
+    models.model.root.RightLeg.RightBootPivot:setVisible(figura_parts)
 end
 
 -- Display Text
@@ -1450,6 +1461,26 @@ config_page_2:newAction(4)
     end)
 
 config_page_2:newAction(6)
+    :title("ModCompat: Figura")
+    :item("minecraft:iron_ingot")
+    :hoverColor(HOVER)
+    :setOnScroll(function(dir, self)
+        armor = armor - dir
+        if armor < 1 then
+            armor = 4
+        elseif armor > 4 then
+            armor = 1
+        end
+        if armor == 1 then self:title("ModCompat: Figura") self:item("minecraft:iron_ingot") end 
+        if armor == 2 then self:title("ModCompat: Figura - Breast") self:item("minecraft:iron_ingot") end 
+        if armor == 3 then self:title("ModCompat: Vanilla ") self:item("minecraft:iron_ingot") end 
+        if armor == 4 then self:title("ModCompat: Vanilla + Breast") self:item("minecraft:iron_ingot") end 
+
+        pings.armor_set(armor)
+    end)
+
+--[[
+config_page_2:newAction(6)
     :title("Mod Compat Off")
     :toggleTitle("Mod Compat On")
     :item("minecraft:iron_ingot")
@@ -1461,6 +1492,7 @@ config_page_2:newAction(6)
     :onUntoggle(function() 
         pings.armor_pivots_toggle(true)
     end)
+--]]
 
 config_page_2:newAction(7)
     :title("Pivots On")
