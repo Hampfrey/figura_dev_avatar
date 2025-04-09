@@ -1,11 +1,21 @@
 -- Constants
 GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
-HOVER = vec(0.96, 0.66, 0.72)
+HOVER = vec(0.96, 0.66, 0.72) --(0.96, 0.66, 0.72)
 
-DRESS = false
-PE_KEYBOARD = 2
-PE_SCALE = 2
+DRESS = false			-- true or false
+PE_KEYBOARD = 2			-- currently 1 or 2
+PE_SCALE = 2			-- scale factor, any number
+
+ARMOR_HELMET = false		-- true or false
+ARMOR_CHESTPLATE = true		-- true or false
+ARMOR_LEGGINGS = true		-- true or false
+ARMOR_BOOTS = true		-- true or false
+ARMOR_SETTING = 1		-- 1 for default, up to 4
+
+CAPE = false			-- true or false
+EYES = 1			-- 1 for default, up to 5
+BLOOD = 1			-- 1 for default, up to 5
 
 TECHNICAL_ANIMATIONS = {animations.model.dress_move, 
                         animations.model.dress_sit, 
@@ -14,15 +24,19 @@ TECHNICAL_ANIMATIONS = {animations.model.dress_move,
                         animations.model.blink_right, 
                         animations.model.blink, 
                         animations.model.consume, 
-                        animations.model.consume_offhand,
-                        animations.model.freeze}
+                        animations.model.consume_offhand
+                        } -- animations.model.freeze
 
--- Hide vanilla player
+-- Set vanilla player
 vanilla_model.PLAYER:setVisible(false)
-vanilla_model.ARMOR:setVisible(false)
 vanilla_model.HELMET_ITEM:setVisible(true)
 vanilla_model.ELYTRA:setVisible(false)
 vanilla_model.CAPE:setVisible(false)
+
+vanilla_model.HELMET:setVisible(ARMOR_HELMET)
+vanilla_model.CHESTPLATE:setVisible(ARMOR_CHESTPLATE)
+vanilla_model.LEGGINGS:setVisible(ARMOR_LEGGINGS)
+vanilla_model.BOOTS:setVisible(ARMOR_BOOTS)
 
 -- Set Visibility
 models.model.root:setVisible(true)
@@ -47,10 +61,14 @@ models.model.root.RightLeg:setVisible(not DRESS)
 
 models.model.root.Body.Breast.BreastArmor:setVisible(false)
 
-models.model.Cape:setVisible(false)
+models.model.Cape:setVisible(CAPE)
 models.model.Elytra:setVisible(true)
 
--- Set Position !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-- Set Position
+if DRESS then
+    models.model.root.LeftArm:setOffsetRot(0, 0, -5)
+    models.model.root.RightArm:setOffsetRot(0, 0, 5)
+end
 
 -- Start action wheel
 main_page = action_wheel:newPage()
@@ -92,7 +110,7 @@ end
 
 -- Armor
 last = nil
-armor = 1
+armor = ARMOR_SETTING
 
 function events.tick()
     local playing = animations:getPlaying(true)
@@ -251,6 +269,7 @@ display_text:setText("")
 function events.render(_, context)
     -- Hide Head in FPV for first person mod
     models.model.root.Head:setVisible(not (renderer:isFirstPerson() and context == "OTHER"))
+    --vanilla_model.HELMET:setVisible(not (renderer:isFirstPerson() and context == "OTHER"))
     
     -- Animation Change Controls
     local playing = animations:getPlaying(true)
@@ -334,7 +353,7 @@ function events.tick()
 end
 
 -- Blink
-blink = 1
+blink = EYES
 blink_timer = 0
 blink_at = 3  --seconds to wait before blink
 SPS = 1 --amount of seconds in second (sps)
@@ -510,7 +529,7 @@ function play_last_animation()
 end
 
 -- Blood
-blood_setting = 1
+blood_setting = BLOOD
 overlay_name = "merged"
 
 function match_texture_sections(texture, b1, b2, c)
@@ -1303,9 +1322,21 @@ config_page:newAction()
     :onToggle(function() pings.blush_toggle(true) end)
     :onUntoggle(function() pings.blush_toggle(false) end)
 
+if EYES == 1 then blink_name = "Blink Auto" end 
+if EYES == 2 then blink_name = "Eyes Closed" end 
+if EYES == 3 then blink_name = "Right Eye Closed" end 
+if EYES == 4 then blink_name = "Left Eye Closed" end
+if EYES == 5 then blink_name = "Eyes Open" end
+
+if EYES == 1 then blink_icon = "minecraft:ender_eye" end 
+if EYES == 2 then blink_icon = "minecraft:ender_pearl" end 
+if EYES == 3 then blink_icon = "minecraft:ender_pearl" end 
+if EYES == 4 then blink_icon = "minecraft:ender_pearl" end
+if EYES == 5 then blink_icon = "minecraft:ender_pearl" end
+
 config_page:newAction()
-    :title("Blink Auto")
-    :item("minecraft:ender_eye")
+    :title(blink_name)
+    :item(blink_icon)
     :hoverColor(HOVER)
     :setOnScroll(function(dir, self)
         blink = blink - dir
@@ -1328,18 +1359,41 @@ config_page:newAction()
     :hoverColor(HOVER)
     :onLeftClick(pe_func_activate)
 
-config_page:newAction()
-    :title("Cape Enable")
-    :toggleTitle("Cape Disable")
-    :item("minecraft:yellow_carpet")
-    :hoverColor(HOVER)
-    :toggleColor(GREEN)
-    :onToggle(function() pings.cape_toggle(true) end)
-    :onUntoggle(function() pings.cape_toggle(false) end)
+if CAPE then
+    config_page:newAction()
+        :title("Cape Enabled")
+        :toggleTitle("Cape Disabled")
+        :item("minecraft:yellow_carpet")
+        :hoverColor(HOVER)
+        :toggleColor(RED)
+        :onToggle(function() pings.cape_toggle(false) end)
+        :onUntoggle(function() pings.cape_toggle(true) end)
+else
+    config_page:newAction()
+        :title("Cape Disabled")
+        :toggleTitle("Cape Enabled")
+        :item("minecraft:yellow_carpet")
+        :hoverColor(HOVER)
+        :toggleColor(GREEN)
+        :onToggle(function() pings.cape_toggle(true) end)
+        :onUntoggle(function() pings.cape_toggle(false) end)
+end
+
+if BLOOD == 1 then blood_name = "Blood Auto" end 
+if BLOOD == 2 then blood_name = "Blood Off" end 
+if BLOOD == 3 then blood_name = "Blood Lvl 1" end 
+if BLOOD == 4 then blood_name = "Blood Lvl 2" end
+if BLOOD == 5 then blood_name = "Blood Lvl 3" end
+
+if BLOOD == 1 then blood_icon = "minecraft:redstone" end 
+if BLOOD == 2 then blood_icon = "minecraft:redstone_block" end 
+if BLOOD == 3 then blood_icon = "minecraft:redstone_block" end 
+if BLOOD == 4 then blood_icon = "minecraft:redstone_block" end
+if BLOOD == 5 then blood_icon = "minecraft:redstone_block" end
 
 config_page:newAction()
-    :title("Blood Auto")
-    :item("minecraft:redstone")
+    :title(blood_name)
+    :item(blood_icon)
     :hoverColor(HOVER)
     :setOnScroll(function(dir, self)
         blood_setting = blood_setting - dir
@@ -1400,65 +1454,141 @@ config_page:newAction()
     :hoverColor(HOVER)
 
 -- Config Page 2
-config_page_2:newAction(1)
-    :title("Helmet Off")
-    :toggleTitle("Helmet On")
-    :item("minecraft:iron_helmet")
-    :hoverColor(HOVER)
-    :toggleColor(GREEN)
-    :onToggle(function() 
-        helmet = true
-        pings.helmet_on()
-    end)
-    :onUntoggle(function() 
-        helmet = false
-        pings.helmet_off()
-    end)
+if ARMOR_HELMET then
+    helmet = true
+    config_page_2:newAction(1)
+        :title("Helmet On")
+        :toggleTitle("Helmet Off")
+        :item("minecraft:iron_helmet")
+        :hoverColor(HOVER)
+        :toggleColor(RED)
+        :onUntoggle(function() 
+            helmet = true
+            pings.helmet_on()
+        end)
+        :onToggle(function() 
+            helmet = false
+            pings.helmet_off()
+        end)
+else
+    helmet = false
+    config_page_2:newAction(1)
+        :title("Helmet Off")
+        :toggleTitle("Helmet On")
+        :item("minecraft:iron_helmet")
+        :hoverColor(HOVER)
+        :toggleColor(GREEN)
+        :onToggle(function() 
+            helmet = true
+            pings.helmet_on()
+        end)
+        :onUntoggle(function() 
+            helmet = false
+            pings.helmet_off()
+        end)
+end
 
-config_page_2:newAction(2)
-    :title("Chestplate Off")
-    :toggleTitle("Chestplate On")
-    :item("minecraft:iron_chestplate")
-    :hoverColor(HOVER)
-    :toggleColor(GREEN)
-    :onToggle(function() 
-        chestplate = true
-        pings.chestplate_on()
-    end)
-    :onUntoggle(function() 
-        chestplate = false
-        pings.chestplate_off()
-    end)
+if ARMOR_CHESTPLATE then
+    chestplate = true
+    config_page_2:newAction(2)
+        :title("Chestplate On")
+        :toggleTitle("Chestplate Off")
+        :item("minecraft:iron_chestplate")
+        :hoverColor(HOVER)
+        :toggleColor(RED)
+        :onUntoggle(function() 
+            chestplate = true
+            pings.chestplate_on()
+        end)
+        :onToggle(function() 
+            chestplate = false
+            pings.chestplate_off()
+        end)
+else
+    chestplate = false
+    config_page_2:newAction(2)
+        :title("Chestplate Off")
+        :toggleTitle("Chestplate On")
+        :item("minecraft:iron_chestplate")
+        :hoverColor(HOVER)
+        :toggleColor(GREEN)
+        :onToggle(function() 
+            chestplate = true
+            pings.chestplate_on()
+        end)
+        :onUntoggle(function() 
+            chestplate = false
+            pings.chestplate_off()
+        end)
+end
 
-config_page_2:newAction(3)
-    :title("Leggings Off")
-    :toggleTitle("Leggings On")
-    :item("minecraft:iron_leggings")
-    :hoverColor(HOVER)
-    :toggleColor(GREEN)
-    :onToggle(function() 
-        leggings = true
-        pings.leggings_on()
-    end)
-    :onUntoggle(function() 
-        leggings = false
-        pings.leggings_off()
-    end)
+if ARMOR_LEGGINGS then
+    leggings = true
+    config_page_2:newAction(3)
+        :title("Leggings On")
+        :toggleTitle("Leggings Off")
+        :item("minecraft:iron_leggings")
+        :hoverColor(HOVER)
+        :toggleColor(RED)
+        :onUntoggle(function() 
+            leggings = true
+            pings.leggings_on()
+        end)
+        :onToggle(function() 
+            leggings = false
+            pings.leggings_off()
+        end)
+else
+    leggings = false
+    config_page_2:newAction(3)
+        :title("Leggings Off")
+        :toggleTitle("Leggings On")
+        :item("minecraft:iron_leggings")
+        :hoverColor(HOVER)
+        :toggleColor(GREEN)
+        :onToggle(function() 
+            leggings = true
+            pings.leggings_on()
+        end)
+        :onUntoggle(function() 
+            leggings = false
+            pings.leggings_off()
+        end)
+end
 
-config_page_2:newAction(4)
-    :title("Boots Off")
-    :toggleTitle("Boots On")
-    :item("minecraft:iron_boots")
-    :hoverColor(HOVER)
-    :toggleColor(GREEN)
-    :onToggle(function() 
-        boots = true
-        pings.boots_on()
-    end)
-    :onUntoggle(function() 
-        boots = false
-        pings.boots_off()
-    end)
+if ARMOR_BOOTS then
+    boots = true
+    config_page_2:newAction(4)
+        :title("Boots On")
+        :toggleTitle("Boots Off")
+        :item("minecraft:iron_boots")
+        :hoverColor(HOVER)
+        :toggleColor(RED)
+        :onUntoggle(function() 
+            boots = true
+            pings.boots_on()
+        end)
+        :onToggle(function() 
+            boots = false
+            pings.boots_off()
+        end)
+else
+    boots = false
+    config_page_2:newAction(4)
+        :title("Boots Off")
+        :toggleTitle("Boots On")
+        :item("minecraft:iron_boots")
+        :hoverColor(HOVER)
+        :toggleColor(GREEN)
+        :onToggle(function() 
+            boots = true
+            pings.boots_on()
+        end)
+        :onUntoggle(function() 
+            boots = false
+            pings.boots_off()
+        end)
+end
 
 config_page_2:newAction(6)
     :title("ModCompat: Figura")

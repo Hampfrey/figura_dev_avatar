@@ -1,3 +1,8 @@
+KNOWN BUGS
+- if armor setting is changed during an animation, vanilla type armors float ominously
+- gumball breaks when rotating any part that is a subpart
+- vanilla type armor rendering is left floating when pose editored
+
 ENTRIES
 
 25/02/07
@@ -190,9 +195,8 @@ Other
 > update f6 help doc
 
 Armor
-> model part logic
-> armor on model parts
-> 
+- model part logic
+- armor on model parts
 
 For FPV and more
 - eating and drinking animation for arm movement
@@ -226,8 +230,14 @@ x see horse, llama, etc
 
  l: add KattArmor for dress?
 
+25/04/09
+ g: try not to stress about chemistry, attempt to add a few more non reactive configs, like enabling armor by default and various others
 
+ r: able to toggle armor on and off by default
+    adding a known bugs section to the top of this document
+    armor settings, eye settings, blood settings, and cape settings
 
+ l: desperately need to check how everything works serverside
 
 
 
