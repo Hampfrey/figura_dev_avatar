@@ -89,6 +89,35 @@ kattArmor.Armor.Chestplate
         models.model.root.Body.Breast.BreastArmor.BreastTrim
     )
 
+MODDED_MATERIALS = {
+    ["aether"] = {
+        "zanite", 
+        "phoenix", 
+        "valkyrie", 
+        "obsidian", 
+        "neptune", 
+        "gravitite"}
+    ["create_sa"] = {
+        "zinc"} 
+}
+
+for i, route in pairs(MODDED_MATERIALS) do
+    for j, material in pairs(route) do
+        log(i, material)
+        kattArmor.Materials[material]
+            :setTexture(i .. ":textures/models/armor/" .. material .. "_layer_1.png")
+            :setTextureLayer2(i .. ":textures/models/armor/" .. material .. "_layer_2.png")
+    end
+end
+--[[
+
+    log(material)
+
+end 
+--]]
+
+
+
 -- Universal Functions
 function remove_val_from(input_table, val)
     for i = #input_table, 1, -1 do 
