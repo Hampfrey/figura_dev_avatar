@@ -3,7 +3,7 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72) --(0.96, 0.66, 0.72)
 
-DRESS = false			-- true or false
+DRESS = true			-- true or false
 PE_KEYBOARD = 2			-- currently 1 or 2
 PE_SCALE = 2			-- scale factor, any number
 
@@ -36,7 +36,7 @@ vanilla_model.CAPE:setVisible(false)
 vanilla_model.HELMET:setVisible(ARMOR_HELMET)
 vanilla_model.CHESTPLATE:setVisible(ARMOR_CHESTPLATE)
 vanilla_model.LEGGINGS:setVisible(ARMOR_LEGGINGS)
-vanilla_model.BOOTS:setVisible(ARMOR_BOOTS)
+vanilla_model.BOOTS:setVisible(ARMOR_BOOTS and not DRESS)
 
 -- Set Visibility
 models.model.root:setVisible(true)
@@ -60,6 +60,7 @@ models.model.root.LeftLeg:setVisible(not DRESS)
 models.model.root.RightLeg:setVisible(not DRESS)
 
 models.model.root.Body.Breast.BreastArmor:setVisible(false)
+models.model.root.Dress.DressArmor:setVisible(false)
 
 models.model.Cape:setVisible(CAPE)
 models.model.Elytra:setVisible(true)
@@ -82,12 +83,13 @@ action_wheel:setPage(main_page)
 local kattArmor = require("KattArmor")()
 
 kattArmor.Armor.Chestplate
-    :addParts(
-        models.model.root.Body.Breast.BreastArmor.BreastArmor
-    )
-    :addTrimParts(
-        models.model.root.Body.Breast.BreastArmor.BreastTrim
-    )
+    :addParts(models.model.root.Body.Breast.BreastArmor.BreastArmor)
+    :addTrimParts(models.model.root.Body.Breast.BreastArmor.BreastTrim)
+kattArmor.Armor.Leggings
+    :addParts(models.model.root.Dress.DressArmor.DressArmor)
+    :addTrimParts(models.model.root.Dress.DressArmor.DressTrim)
+    :addParts(models.model.root.Dress.DressArmor.DressArmorLower)
+    :addTrimParts(models.model.root.Dress.DressArmor.DressTrimLower)
 
 MODDED_MATERIALS = {
     ["aether"] = {
@@ -96,27 +98,19 @@ MODDED_MATERIALS = {
         "valkyrie", 
         "obsidian", 
         "neptune", 
-        "gravitite"}
+        "gravitite"},
     ["create_sa"] = {
-        "zinc"} 
+        "zinc",
+        "brass"} 
 }
 
 for i, route in pairs(MODDED_MATERIALS) do
     for j, material in pairs(route) do
-        log(i, material)
         kattArmor.Materials[material]
             :setTexture(i .. ":textures/models/armor/" .. material .. "_layer_1.png")
             :setTextureLayer2(i .. ":textures/models/armor/" .. material .. "_layer_2.png")
     end
 end
---[[
-
-    log(material)
-
-end 
---]]
-
-
 
 -- Universal Functions
 function remove_val_from(input_table, val)
@@ -175,6 +169,7 @@ function events.tick()
     last = recent
 
     models.model.root.Body.Breast.BreastArmor:setVisible(armor == 1 and vanilla_model.CHESTPLATE:getVisible())
+    models.model.root.Dress.DressArmor:setVisible(armor == 1 and vanilla_model.LEGGINGS:getVisible())
 
     if player:getItem(5).id == "minecraft:air" or player:getItem(5).id == "minecraft:elytra" then
         models.model.root.Body.Breast:setVisible(true)
@@ -243,16 +238,18 @@ end
 
 function pings.leggings_on()
     if not pe_active and not models.model.root.Head.HelmetPivot:getVisible() then animations:stopAll() end
+    models.model.root.Dress.DressArmor:setVisible(models.model.root.Body.LeggingsPivot:getVisible())
     vanilla_model.LEGGINGS:setVisible(true)
 end
 
 function pings.leggings_off()
+    models.model.root.Dress.DressArmor:setVisible(false)
     vanilla_model.LEGGINGS:setVisible(false)
 end
 
 function pings.boots_on()
     if not pe_active and not models.model.root.Head.HelmetPivot:getVisible() then animations:stopAll() end
-    vanilla_model.BOOTS:setVisible(true)
+    vanilla_model.BOOTS:setVisible(not DRESS)
 end
 
 function pings.boots_off()
@@ -272,6 +269,7 @@ function pings.armor_set(armor_setting)
     end
     if figura_parts == false then
         models.model.root.Body.Breast.BreastArmor:setVisible(false)
+        models.model.root.Dress.DressArmor:setVisible(false)
     end
     models.model.root.Head.HelmetPivot:setVisible(figura_parts)
     models.model.root.Body.ChestplatePivot:setVisible(figura_parts)
