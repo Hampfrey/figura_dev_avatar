@@ -1,9 +1,10 @@
--- Constants
+-- Settings
 GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72) --(0.96, 0.66, 0.72)
 
 DRESS = true			-- true or false
+
 PE_KEYBOARD = 2			-- currently 1 or 2
 PE_SCALE = 2			-- scale factor, any number
 
@@ -17,15 +18,29 @@ CAPE = false			-- true or false
 EYES = 1			-- 1 for default, up to 5
 BLOOD = 1			-- 1 for default, up to 5
 
-TECHNICAL_ANIMATIONS = {animations.model.dress_move, 
-                        animations.model.dress_sit, 
-                        animations.model.dress_crouch, 
-                        animations.model.blink_left, 
-                        animations.model.blink_right, 
-                        animations.model.blink, 
-                        animations.model.consume, 
-                        animations.model.consume_offhand
-                        } -- animations.model.freeze
+MODDED_MATERIALS = {
+    ["aether"] = {
+        "zanite", 
+        "phoenix", 
+        "valkyrie", 
+        "obsidian", 
+        "neptune", 
+        "gravitite"},
+    ["create_sa"] = {
+        "zinc",
+        "brass"} 
+}
+
+TECHNICAL_ANIMATIONS = {
+    animations.model.dress_move, 
+    animations.model.dress_sit, 
+    animations.model.dress_crouch, 
+    animations.model.blink_left, 
+    animations.model.blink_right, 
+    animations.model.blink, 
+    animations.model.consume, 
+    animations.model.consume_offhand
+}
 
 -- Set vanilla player
 vanilla_model.PLAYER:setVisible(false)
@@ -90,19 +105,6 @@ kattArmor.Armor.Leggings
     :addTrimParts(models.model.root.Dress.DressArmor.DressTrim)
     :addParts(models.model.root.Dress.DressArmor.DressArmorLower)
     :addTrimParts(models.model.root.Dress.DressArmor.DressTrimLower)
-
-MODDED_MATERIALS = {
-    ["aether"] = {
-        "zanite", 
-        "phoenix", 
-        "valkyrie", 
-        "obsidian", 
-        "neptune", 
-        "gravitite"},
-    ["create_sa"] = {
-        "zinc",
-        "brass"} 
-}
 
 for i, route in pairs(MODDED_MATERIALS) do
     for j, material in pairs(route) do
@@ -347,6 +349,7 @@ function events.tick()
         local crouching = player:getPose() == "CROUCHING"
         local moving = player:getVelocity().xz:length() > .01
         local sitting = false
+        local flying = player:getPose() == "FALL_FLYING"
         if player:getVehicle() then
             sitting = true
         end
@@ -359,9 +362,9 @@ function events.tick()
         local move = player:getVelocity():normalize().xz
         local direction = move:dot(face)
 
-        animations.model.dress_move:setPlaying(moving and not sitting)
+        animations.model.dress_move:setPlaying(moving and not (sitting or flying))
         animations.model.dress_move:setSpeed(player:getVelocity().xz:length() * 5)
-        if not sitting and not pe_active then models.model.root.Dress:setOffsetRot(player:getVelocity().xz:length() * -30 * direction, 0, 0) end
+        if not (sitting or pe_active or flying) then models.model.root.Dress:setOffsetRot(player:getVelocity().xz:length() * -30 * direction, 0, 0) end
     end
 
     -- Using
@@ -1295,35 +1298,35 @@ function check_toggles()
 end
 
 -- Actions
-local action = main_page:newAction()
+local action = main_page:newAction(1)
     :title("Wave")
     :item("minecraft:bell")
     :hoverColor(HOVER)
     :onLeftClick(pings.wave)
 
-local action = main_page:newAction()
+local action = main_page:newAction(2)
     :title("Curl")
     :item("minecraft:sugar")
     :hoverColor(HOVER)
     :onLeftClick(pings.curl)
 
-local action = main_page:newAction()
+local action = main_page:newAction(3)
     :title("Sit Down")
     :item("minecraft:grass_block")
     :hoverColor(HOVER)
     :onLeftClick(pings.sit_floor)
 
-local action = main_page:newAction()
+local action = main_page:newAction(4)
     :title("Sit")
     :item("minecraft:oak_planks")
     :hoverColor(HOVER)
     :onLeftClick(pings.sit_block)
 
-main_page:setAction(-1, require("script_emotes_page"))
+main_page:setAction(5, require("script_emotes_page"))
 
-main_page:setAction(-1, require("script_poses_page"))
+main_page:setAction(6, require("script_poses_page"))
 
-local action = main_page:newAction()
+local action = main_page:newAction(7)
     :title("Config")
     :onLeftClick(function()
         action_wheel:setPage(config_page)
@@ -1333,7 +1336,7 @@ local action = main_page:newAction()
     :hoverColor(HOVER)
     :item("minecraft:name_tag")
 
-local action = main_page:newAction()
+local action = main_page:newAction(8)
     :title("Play Last: " .. last_animation)
     :item("minecraft:amethyst_shard")
     :hoverColor(HOVER)
@@ -1382,7 +1385,7 @@ config_page:newAction()
 
 config_page:newAction()
     :title("Pose Editor")
-    :texture(textures["other_textures.techinical"], 0, 47, 17, 17)
+    :texture(textures["other_textures.technical"], 0, 47, 17, 17)
     :hoverColor(HOVER)
     :onLeftClick(pe_func_activate)
 
@@ -1629,8 +1632,8 @@ config_page_2:newAction(6)
             armor = 1
         end
         if armor == 1 then self:title("ModCompat: Figura") self:item("minecraft:iron_ingot") end 
-        if armor == 2 then self:title("ModCompat: Figura - Breast") self:item("minecraft:iron_ingot") end 
-        if armor == 3 then self:title("ModCompat: Vanilla ") self:item("minecraft:iron_ingot") end 
+        if armor == 2 then self:title("ModCompat: Figura - Modelparts") self:item("minecraft:iron_ingot") end 
+        if armor == 3 then self:title("ModCompat: Vanilla") self:item("minecraft:iron_ingot") end 
         if armor == 4 then self:title("ModCompat: Vanilla + Breast") self:item("minecraft:iron_ingot") end 
 
         pings.armor_set(armor)

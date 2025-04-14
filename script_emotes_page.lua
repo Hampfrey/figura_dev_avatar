@@ -5,20 +5,22 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72)
 
+local function action_wheel_animation_control(animation_name)
+    last_animation = animation_name
+    animations:stopAll() check_toggles()
+    animations.model[animation_name]:play()
+end
+
 -- Functions
 function pings.wave()
-    last_animation = "wave"
-    animations:stopAll() check_toggles()
-    animations.model["wave"]:play()
+    action_wheel_animation_control("wave")
 end
 
 function pings.stretch()
-    last_animation = "stretch"
-    animations:stopAll() check_toggles()
-    animations.model["stretch"]:play()
+    action_wheel_animation_control("stretch")
 end
 
--- Define the Actions within the Page
+-- Actions
 emotes_page:newAction()
     :title("Wave")
     :item("minecraft:bell")
@@ -31,9 +33,6 @@ emotes_page:newAction()
     :hoverColor(HOVER)
     :onLeftClick(pings.stretch)
 
--- This variable stores the Page to go back to when done with this Page
-
--- This Action just sets the stored page as active
 emotes_page:newAction()
     :title("Go Back")
     :item("minecraft:barrier")
@@ -43,6 +42,7 @@ emotes_page:newAction()
     end)
     :hoverColor(HOVER)
 
+-- Open Emotes
 return action_wheel:newAction()
     :title("Emotes")
     :onLeftClick(function()

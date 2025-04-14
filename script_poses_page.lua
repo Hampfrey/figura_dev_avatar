@@ -11,41 +11,22 @@ HOVER = vec(0.96, 0.66, 0.72)
 -- Position
 scroll_lock_key = keybinds:newKeybind("Scroll Lock", "key.mouse.right")
 local position = 1
-local sub_position = 1
 function action_wheel.scroll(direction)
     if neutral_poses_page_1 == action_wheel:getCurrentPage() or neutral_poses_page_2 == action_wheel:getCurrentPage() or conf_poses_page_1 == action_wheel:getCurrentPage() or shy_poses_page_1 == action_wheel:getCurrentPage() or other_poses_page_1 == action_wheel:getCurrentPage() then
-        if scroll_lock_key:isPressed() then
---[[
-            -- Neutral Sub Pages
-            if position == 1 then
-                sub_position = sub_position - direction
-                if sub_position < 1 then
-                    sub_position = 1
-                elseif sub_position > 1 then
-                    sub_position = 1
-                end
-
-                if sub_position == 1 then action_wheel:setPage(neutral_poses_page_1) display_text:setText("Neutral 1/1") end
-            end
---]]
-        else
-            position = position - direction
-            if position < 1 then
-                position = 4
-            elseif position > 4 then
-                position = 1
-            end
-
-            if position == 1 then action_wheel:setPage(neutral_poses_page_1) display_text:setText("Neutral 1/2") end
-            if position == 2 then action_wheel:setPage(neutral_poses_page_2) display_text:setText("Neutral 2/2") end
-            if position == 3 then action_wheel:setPage(conf_poses_page_1) display_text:setText("Confident 1/1") end
-            if position == 4 then action_wheel:setPage(shy_poses_page_1) display_text:setText("Shy 1/1") end
-            sub_position = 1 -- sub_position is reset back to default if another page is moved to
+        position = position - direction
+        if position < 1 then
+            position = 4
+        elseif position > 4 then
+            position = 1
         end
+        if position == 1 then action_wheel:setPage(neutral_poses_page_1) display_text:setText("Neutral 1/2") end
+        if position == 2 then action_wheel:setPage(neutral_poses_page_2) display_text:setText("Neutral 2/2") end
+        if position == 3 then action_wheel:setPage(conf_poses_page_1) display_text:setText("Confident 1/1") end
+        if position == 4 then action_wheel:setPage(shy_poses_page_1) display_text:setText("Shy 1/1") end
     end
 end
 
-function action_wheel_animation_control(animation_name)
+local function action_wheel_animation_control(animation_name)
     last_animation = animation_name
     if anim_is_active(animations.model[animation_name]) then
         animations.model[animation_name .. "_end"]:play()
