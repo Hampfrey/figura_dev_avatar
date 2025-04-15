@@ -3,7 +3,7 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72) --(0.96, 0.66, 0.72)
 
-DRESS = true			-- true or false
+DRESS = false			-- true or false
 
 PE_KEYBOARD = 2			-- currently 1 or 2
 PE_SCALE = 2			-- scale factor, any number
@@ -461,7 +461,8 @@ function pings.emoticon_reset()
     models.model.root.Head.Camera.Emoticon4:setVisible(false)
 end
 
-function pings.emoticon_set()
+function pings.emoticon_set(setting)
+    current_emoticon = setting
     if current_emoticon == 1 then
         models.model.root.Head.Camera.Emoticon1:setVisible(true)
         models.model.root.Head.Camera.Emoticon2:setVisible(false)
@@ -1284,7 +1285,7 @@ function pings.cape_toggle(setting)
     models.model.Cape:setVisible(setting)
 end
 
-function pings.blush_toggle()
+function pings.blush_toggle(setting)
     models.model.root.Head.MainExpression:setVisible(not setting) 
     models.model.root.Head.SecondaryExpression:setVisible(setting)
 end
@@ -1454,7 +1455,7 @@ config_page:newAction()
     :title("Emoticon (\" ! \")")
     :item("minecraft:oak_sign")
     :hoverColor(HOVER)
-    :onLeftClick(pings.emoticon_set)
+    :onLeftClick(function() pings.emoticon_set(current_emoticon) end)
     :onRightClick(pings.emoticon_reset)
     :setOnScroll(function(dir, self)
         current_emoticon = current_emoticon - dir

@@ -243,6 +243,12 @@ x see horse, llama, etc
  g: forgot to do anything about the serverside components, delaying start of the multiavatar until then
     maybe just maybe update the help doc?
 
+ r: serverside checks done
+    help doc updated
+
+ l: last thing, make it work with 4px arm avatars, should be fairly simple to set up, but will cause so much pain updating my like 40 different skins to match the new format
+    
+
 
 
 
