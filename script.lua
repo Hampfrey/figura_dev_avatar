@@ -4,6 +4,8 @@ RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72) --(0.96, 0.66, 0.72)
 
 DRESS = false			-- true or false
+WIDE = false			-- true or false
+BREASTS = true			-- true or false
 
 PE_KEYBOARD = 2			-- currently 1 or 2
 PE_SCALE = 2			-- scale factor, any number
@@ -73,6 +75,11 @@ models.model.root.Head.Camera.Emoticon4:setVisible(false)
 models.model.root.Dress:setVisible(DRESS)
 models.model.root.LeftLeg:setVisible(not DRESS)
 models.model.root.RightLeg:setVisible(not DRESS)
+
+models.model.root.LeftArm.LeftSlim:setVisible(not WIDE)
+models.model.root.LeftArm.LeftWide:setVisible(WIDE)
+models.model.root.RightArm.RightSlim:setVisible(not WIDE)
+models.model.root.RightArm.RightWide:setVisible(WIDE)
 
 models.model.root.Body.Breast.BreastArmor:setVisible(false)
 models.model.root.Dress.DressArmor:setVisible(false)
@@ -170,7 +177,7 @@ function events.tick()
     end
     last = recent
 
-    models.model.root.Body.Breast.BreastArmor:setVisible(armor == 1 and vanilla_model.CHESTPLATE:getVisible())
+    models.model.root.Body.Breast.BreastArmor:setVisible(armor == 1 and vanilla_model.CHESTPLATE:getVisible() and BREASTS)
     models.model.root.Dress.DressArmor:setVisible(armor == 1 and vanilla_model.LEGGINGS:getVisible())
 
     if player:getItem(5).id == "minecraft:air" or player:getItem(5).id == "minecraft:elytra" then
@@ -229,7 +236,7 @@ end
 
 function pings.chestplate_on()
     if not pe_active and not models.model.root.Head.HelmetPivot:getVisible() then animations:stopAll() end
-    models.model.root.Body.Breast.BreastArmor:setVisible(models.model.root.Body.ChestplatePivot:getVisible())
+    models.model.root.Body.Breast.BreastArmor:setVisible(models.model.root.Body.ChestplatePivot:getVisible() and BREASTS)
     vanilla_model.CHESTPLATE:setVisible(true) 
 end
 
@@ -576,7 +583,8 @@ end
 
 function generate_second_layer(texture)
     match_texture_sections(texture, vec( 0, 16), vec(53, 31), vec( 0, 32))
-    -- match_texture_sections(textrue, vec( 0,  0), vec(31, 15), vec(32,  0))
+    match_texture_sections(texture, vec( 0,  0), vec(31, 15), vec(32,  0))
+    match_texture_sections(texture, vec( 8,  8), vec(15, 15), vec(56,  0))
     match_texture_sections(texture, vec(16, 48), vec(31, 63), vec( 0, 48))
     match_texture_sections(texture, vec(32, 48), vec(47, 63), vec(48, 48))
     match_texture_sections(texture, vec( 8,  8), vec(15, 15), vec( 0,  0))

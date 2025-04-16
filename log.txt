@@ -248,7 +248,8 @@ x see horse, llama, etc
 
  l: last thing, make it work with 4px arm avatars, should be fairly simple to set up, but will cause so much pain updating my like 40 different skins to match the new format
     
-
+25/04/15
+ g: lots of time in drafting, working on 4px arm
 
 
 
