@@ -3,7 +3,7 @@ GREEN = vec(0.43, 0.76, 0.246)
 RED = vec(0.93, 0.14, 0.23)
 HOVER = vec(0.96, 0.66, 0.72) --(0.96, 0.66, 0.72)
 
-DRESS = false			-- true or false
+DRESS = true			-- true or false
 WIDE = false			-- true or false
 BREASTS = true			-- true or false
 
@@ -682,6 +682,7 @@ end
 -- Blood Main
 function events.tick()
     blood(player:getHealth())
+    models.model.root.Head:setVisible(false)
 end
 
 -- Pose Editor
